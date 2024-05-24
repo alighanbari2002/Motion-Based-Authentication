@@ -127,15 +127,35 @@ void DataReadingHandler::setaccActive(bool newAccActive)
 
 void DataReadingHandler::handleMovementX(double a)
 {
-    double v = (a + prevAccX)/2;
+    double v = m_velocityX + ((a + prevAccX)/2)/datarate;
+    double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX + m_movement;
+    if(v <= 0)
+    {
+        v = 0;
+        x = 0;
+        setgyroActive(true);
+        state = Initial;
+    }
     setvelocityX(v);
+    setMovement(x);
 }
 
 void DataReadingHandler::handleMovementY(double a)
 {
-    setvelocityY((a + prevAccY)/2);
+    double v = m_velocityY + ((a + prevAccY)/2)/datarate;
+    double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY + m_movement;
+    if(v <= 0)
+    {
+        v = 0;
+        x = 0;
+        setgyroActive(true);
+        state = Initial;
+    }
+    setvelocityY(v);
+    setMovement(x);
 }
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
+
 }
