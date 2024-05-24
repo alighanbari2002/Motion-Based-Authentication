@@ -18,6 +18,7 @@ qt_add_qml_module(appQtSensorAuth
     QML_FILES
         Main.qml
         SOURCES textboxhandler.h textboxhandler.cpp
+        QML_FILES ProgressXYZBar.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

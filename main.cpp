@@ -6,8 +6,6 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    TextBoxHandler *textboxhandler = new TextBoxHandler();
-
     qmlRegisterType<TextBoxHandler>("com.textbox", 1, 0, "TextBoxHandler");
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/QtSensorAuth/Main.qml"));
