@@ -3,20 +3,20 @@
 
 #include <QObject>
 
-class DataReadingHandler
+class DataReadingHandler : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(real movement READ movement WRITE setMovement
+    Q_PROPERTY(double movement READ movement WRITE setMovement
                    NOTIFY movementChanged FINAL)
 
-    Q_PROPERTY(real velocityX READ velocityX WRITE setvelocityX
+    Q_PROPERTY(double velocityX READ velocityX WRITE setvelocityX
                    NOTIFY velocityXChanged FINAL)
 
-    Q_PROPERTY(real velocityY READ velocityY WRITE setvelocityY
+    Q_PROPERTY(double velocityY READ velocityY WRITE setvelocityY
                    NOTIFY velocityYChanged FINAL)
 
-    Q_PROPERTY(real rotationZ READ rotationZ WRITE setRotationZ
+    Q_PROPERTY(double rotationZ READ rotationZ WRITE setRotationZ
                    NOTIFY rotationZChanged FINAL)
 
     Q_PROPERTY(bool gyroActive READ gyroActive WRITE setgyroActive
@@ -30,17 +30,24 @@ public:
     Q_INVOKABLE void accReading(double accX, double accY);
     Q_INVOKABLE void gyroReading(double gyroV);
 
-    real movement() const;
-    void setMovement(real newMovement);
+    enum ReadingState { Initial, MoveX, MoveY, Rotation };
+    Q_ENUM(ReadingState)
+    ReadingState state = Initial;
 
-    real velocityX() const;
-    void setvelocityX(real newVelocityX);
+    enum MoveDirection { Left, Right, Up, Down };
+    Q_ENUM(MoveDirection)
 
-    real velocityY() const;
-    void setvelocityY(real newVelocityY);
+    double movement() const;
+    void setMovement(double newMovement);
 
-    real rotationZ() const;
-    void setRotationZ(real newRotationZ);
+    double velocityX() const;
+    void setvelocityX(double newVelocityX);
+
+    double velocityY() const;
+    void setvelocityY(double newVelocityY);
+
+    double rotationZ() const;
+    void setRotationZ(double newRotationZ);
 
     bool gyroActive() const;
     void setgyroActive(bool newGyroActive);
@@ -63,13 +70,6 @@ signals:
 
 
 private:
-    enum ReadingState { Initial, MoveX, MoveY, Rotation };
-    Q_ENUM(ReadingState)
-    ReadingState state = Initial;
-
-    enum MoveDirection { Left, Right, Up, Down };
-    Q_ENUM(MoveDirection)
-
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
     double prevAccY = 0;
@@ -79,10 +79,10 @@ private:
     const double rotationThresh = 0.3;
     const double datarate = 25;
 
-    real m_movement = 0;
-    real m_velocityX = 0;
-    real m_velocityY = 0;
-    real m_rotationZ = 0;
+    double m_movement = 0;
+    double m_velocityX = 0;
+    double m_velocityY = 0;
+    double m_rotationZ = 0;
     bool m_gyroActive = 0;
     bool m_accActive = 0;
 

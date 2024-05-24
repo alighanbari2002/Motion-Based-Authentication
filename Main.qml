@@ -1,8 +1,9 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtSensors
-import com.textbox 1.0
+import com.DataReadingHandler.h 1.0
 
 ApplicationWindow {
     id: root;
@@ -136,14 +137,6 @@ ApplicationWindow {
             x = (reading as GyroscopeReading).x
             y = (reading as GyroscopeReading).y
             z = (reading as GyroscopeReading).z
-        }
-    }
-
-    TextBoxHandler {
-        id: textboxhandler
-        onPixelszChanged: {
-            thetext.font.pixelSize = pixelsz;
-            console.log("hellooooooooooooooo");
         }
     }
 

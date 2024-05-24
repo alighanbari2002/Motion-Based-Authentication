@@ -47,12 +47,12 @@ void DataReadingHandler::gyroReading(double gyroV)
     }
 }
 
-real DataReadingHandler::movement() const
+double DataReadingHandler::movement() const
 {
     return m_movement;
 }
 
-void DataReadingHandler::setMovement(real newMovement)
+void DataReadingHandler::setMovement(double newMovement)
 {
     if (m_movement == newMovement)
         return;
@@ -60,12 +60,12 @@ void DataReadingHandler::setMovement(real newMovement)
     emit movementChanged();
 }
 
-real DataReadingHandler::velocityX() const
+double DataReadingHandler::velocityX() const
 {
     return m_velocityX;
 }
 
-void DataReadingHandler::setvelocityX(real newVelocityX)
+void DataReadingHandler::setvelocityX(double newVelocityX)
 {
     if (m_velocityX == newVelocityX)
         return;
@@ -73,12 +73,12 @@ void DataReadingHandler::setvelocityX(real newVelocityX)
     emit velocityXChanged();
 }
 
-real DataReadingHandler::velocityY() const
+double DataReadingHandler::velocityY() const
 {
     return m_velocityY;
 }
 
-void DataReadingHandler::setvelocityY(real newVelocityY)
+void DataReadingHandler::setvelocityY(double newVelocityY)
 {
     if (m_velocityY == newVelocityY)
         return;
@@ -86,12 +86,12 @@ void DataReadingHandler::setvelocityY(real newVelocityY)
     emit velocityYChanged();
 }
 
-real DataReadingHandler::rotationZ() const
+double DataReadingHandler::rotationZ() const
 {
     return m_rotationZ;
 }
 
-void DataReadingHandler::setRotationZ(real newRotationZ)
+void DataReadingHandler::setRotationZ(double newRotationZ)
 {
     if (m_rotationZ == newRotationZ)
         return;
@@ -138,5 +138,4 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-    double v =
 }
