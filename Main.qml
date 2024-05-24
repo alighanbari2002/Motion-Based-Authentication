@@ -4,8 +4,8 @@ import com.textbox 1.0
 
 Window {
     id: root;
-    width: 640
-    height: 480
+    width: 420
+    height: 760
     visible: true
     title: qsTr("Hello World")
     color: "pink";

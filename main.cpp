@@ -1,14 +1,12 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "textboxhandler.h"
+#include "DataReadingHandler.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    TextBoxHandler *textboxhandler = new TextBoxHandler();
-
-    qmlRegisterType<TextBoxHandler>("com.textbox", 1, 0, "TextBoxHandler");
+    qmlRegisterType<DataReadingHandler>("com.DataReadingHandler.h", 1, 0, "DataReadingHandler");
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/QtSensorAuth/Main.qml"));
     QObject::connect(
