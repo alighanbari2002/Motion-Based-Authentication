@@ -146,6 +146,3 @@ ApplicationWindow {
         hidrect.isvisible = !hidrect.isvisible
     }
 }
-
-
-
