@@ -4,7 +4,7 @@ project(QtSensorAuth VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sensors)
 
 qt_standard_project_setup()
 
@@ -34,7 +34,7 @@ set_target_properties(appQtSensorAuth PROPERTIES
 )
 
 target_link_libraries(appQtSensorAuth
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick Qt6::Sensors
 )
 
 include(GNUInstallDirs)

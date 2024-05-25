@@ -7,7 +7,7 @@ ColumnLayout {
     id: root
     spacing: 0
 
-    required property int fontSize
+    // required property int fontSize
     property alias xText: xBar.text
     property alias xValue: xBar.value
     property alias yText: yBar.text

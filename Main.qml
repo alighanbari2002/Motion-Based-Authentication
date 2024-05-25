@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtSensors
 import com.DataReadingHandler.h 1.0
 
+
 ApplicationWindow {
     id: root;
     width: 420
@@ -82,7 +83,7 @@ ApplicationWindow {
 
         ProgressXYZBar {
             Layout.fillWidth: true
-            fontSize: root.fontSize
+            // fontSize: root.fontSize
             xText: "X: " + accelerometer.x.toFixed(2)
             xValue: 0.5 + (accelerometer.x / 100)
             yText: "Y: " + accelerometer.y.toFixed(2)
@@ -98,7 +99,7 @@ ApplicationWindow {
 
         ProgressXYZBar {
             Layout.fillWidth: true
-            fontSize: root.fontSize
+            // fontSize: root.fontSize
             xText: "X: " + gyroscope.x.toFixed(2)
             xValue: 0.5 + (gyroscope.x / 1000)
             yText: "Y: " + gyroscope.y.toFixed(2)
@@ -112,7 +113,6 @@ ApplicationWindow {
         property real x: 0
         property real y: 0
         property real z: 0
-
         active: true
         dataRate: 25
 
