@@ -157,5 +157,13 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-
+    double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
+    if(teta <= 0)
+    {
+        teta = 0;
+        setaccActive(true);
+        state = Initial;
+    }
+    setRotationZ(teta);
 }
+

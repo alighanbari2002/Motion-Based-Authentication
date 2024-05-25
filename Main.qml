@@ -56,6 +56,13 @@ ApplicationWindow {
         }
 
         CustomButton {
+            text: "Start Calibration"
+            onClicked: outfield.text = "Calibration Started"
+            // {dataHandler.calibration();
+            // enabled: SensorSupport.hasAccelerometer()
+        }
+
+        CustomButton {
             text: "Start Pattern"
             // onClicked: stack.pusher("Accelerometer.qml")
             // enabled: SensorSupport.hasAccelerometer()
@@ -107,6 +114,11 @@ ApplicationWindow {
             zText: "Z: " + gyroscope.z.toFixed(2)
             zValue: 0.5 + (gyroscope.z / 1000)
         }
+
+        Text {
+            id: outfield
+            text: qsTr("Welcome")
+        }
     }
     Accelerometer {
         id: accelerometer
@@ -120,6 +132,7 @@ ApplicationWindow {
             x = (reading as AccelerometerReading).x
             y = (reading as AccelerometerReading).y
             z = (reading as AccelerometerReading).z
+            dataHandler.accReading(x,y)
         }
 
     }
@@ -137,7 +150,13 @@ ApplicationWindow {
             x = (reading as GyroscopeReading).x
             y = (reading as GyroscopeReading).y
             z = (reading as GyroscopeReading).z
+            dataHandler.gyroReading(z)
         }
+    }
+
+    DataReadingHandler{
+        id: dataHandler
+
     }
 
     function myfunc() {
