@@ -119,6 +119,21 @@ ApplicationWindow {
             id: outfield
             text: qsTr("Welcome")
         }
+
+        Text {
+            id: movementout
+            text: qsTr("Movement: 0")
+        }
+
+        Text {
+            id: rotationout
+            text: qsTr("Rotation: 0")
+        }
+
+        Text {
+            id: authenticationout
+            text: qsTr("Authentication: 0")
+        }
     }
     Accelerometer {
         id: accelerometer
@@ -156,7 +171,38 @@ ApplicationWindow {
 
     DataReadingHandler{
         id: dataHandler
+        onMovementChanged: {
+            console.log("Movement: " + dataHandler.movement)
+            movementout.text = "Movement: " + dataHandler.movement
+        }
 
+        onRotationZChanged: {
+            console.log("Rotation: " + dataHandler.rotation)
+            rotationout.text = "Rotation: " + dataHandler.rotation
+        }
+
+        onVelocityXChanged: {
+            console.log("VelocityX: " + dataHandler.velocity)
+        }
+
+        onVelocityYChanged: {
+            console.log("VelocityY: " + dataHandler.velocity)
+        }
+
+        onAccActiveChanged: {
+            if (dataHandler.accActive) {
+                accelerometer.start();
+            } else {
+                accelerometer.stop();
+            }
+        }
+        onGyroActiveChanged: {
+            if (dataHandler.gyroActive) {
+                gyroscope.start();
+            } else {
+                gyroscope.stop();
+            }
+        }
     }
 
     function myfunc() {

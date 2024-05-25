@@ -109,6 +109,7 @@ void DataReadingHandler::setgyroActive(bool newGyroActive)
     if (m_gyroActive == newGyroActive)
         return;
     m_gyroActive = newGyroActive;
+
     emit gyroActiveChanged();
 }
 
