@@ -1,4 +1,6 @@
 #include "DataReadingHandler.h"
+#include <QDebug>
+#include <iostream>
 
 DataReadingHandler::DataReadingHandler() {}
 
@@ -11,7 +13,7 @@ void DataReadingHandler::accReading(double accX, double accY)
     else if(state == Calibration)
     {
         updateCalibrationInfo(accX, accXSum, accXCount);
-        updateCalibrationInfo(accX, accYSum, accYCount);
+        updateCalibrationInfo(accY, accYSum, accYCount);
 
     }
     else if(state == Initial && fabs(prevAccX - accX) > accThresh)
@@ -78,6 +80,7 @@ void DataReadingHandler::stopPattern()
 
 void DataReadingHandler::startCalibration()
 {
+    std::cout << "Calibration started" << std::endl;
     state = Calibration;
     accXSum = 0;
     accXCount = 0;
@@ -207,13 +210,16 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
+    gyroV -= rotationNoise;
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
-    if(teta <= 0)
+    if(gyroV <= rotationThresh)
     {
+        //TODO: save action
         teta = 0;
         setaccActive(true);
         state = Initial;
     }
+    prevRotation = gyroV;
     setRotationZ(teta);}
 
 void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count)
@@ -230,7 +236,23 @@ void DataReadingHandler::stopCalibration()
 {
     rotationNoise = rotationSum / rotationCount;
     accXnoise = accXSum / accXCount;
-    accXnoise = accXSum / accXCount;
+    accYnoise = accYSum / accYCount;
+    QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " + QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
+    setCalibration(cal);
     state = Idle;
+
 }
 
+
+QString DataReadingHandler::calibration() const
+{
+    return m_calibration;
+}
+
+void DataReadingHandler::setCalibration(const QString &newCalibration)
+{
+    if (m_calibration == newCalibration)
+        return;
+    m_calibration = newCalibration;
+    emit calibrationChanged();
+}

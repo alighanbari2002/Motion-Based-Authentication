@@ -25,6 +25,9 @@ class DataReadingHandler : public QObject
     Q_PROPERTY(bool accActive READ accActive WRITE setaccActive
                    NOTIFY accActiveChanged FINAL)
 
+    Q_PROPERTY(QString calibration READ calibration WRITE setCalibration
+                   NOTIFY calibrationChanged FINAL)
+
 public:
     DataReadingHandler();
     Q_INVOKABLE void accReading(double accX, double accY);
@@ -58,6 +61,9 @@ public:
     bool accActive() const;
     void setaccActive(bool newAccActive);
 
+    QString calibration() const;
+    void setCalibration(const QString &newCalibration);
+
 signals:
     void movementChanged();
 
@@ -72,6 +78,8 @@ signals:
     void accActiveChanged();
 
 
+    void calibrationChanged();
+
 private:
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
@@ -80,13 +88,13 @@ private:
 
     // Constants
     const double accThresh = 0.3;
-    const double rotationThresh = 0.3;
+    const double rotationThresh = 5;
     const double datarate = 25;
 
     // Thresholds
     const int calibrationLimit = 100;
-    const double stationaryAccXThresh = 0.1;
-    const double stationaryAccYThresh = 0.1;
+    const double stationaryAccXThresh = 0.15;
+    const double stationaryAccYThresh = 0.15;
     const double stationaryRotationThresh = 0.1;
 
     // Q_PROPERTY values
@@ -114,6 +122,7 @@ private:
     void updateCalibrationInfo(double newData, double &sum, double &count);
     void stopCalibration();
 
+    QString m_calibration;
 };
 
 #endif // DATAREADINGHANDLER_H
