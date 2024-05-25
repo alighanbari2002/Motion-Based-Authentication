@@ -20,7 +20,7 @@ ColumnLayout {
         property alias value: bar.value
         Text {
             id: axes
-            font.pixelSize: root.fontSize
+            // font.pixelSize: root.fontSize
             Layout.fillWidth: true
         }
         ProgressBar {

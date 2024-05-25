@@ -152,6 +152,7 @@ void DataReadingHandler::setgyroActive(bool newGyroActive)
     if (m_gyroActive == newGyroActive)
         return;
     m_gyroActive = newGyroActive;
+
     emit gyroActiveChanged();
 }
 
@@ -206,7 +207,14 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-}
+    double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
+    if(teta <= 0)
+    {
+        teta = 0;
+        setaccActive(true);
+        state = Initial;
+    }
+    setRotationZ(teta);}
 
 void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count)
 {
@@ -225,3 +233,4 @@ void DataReadingHandler::stopCalibration()
     accXnoise = accXSum / accXCount;
     state = Idle;
 }
+

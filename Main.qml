@@ -56,6 +56,13 @@ ApplicationWindow {
         }
 
         CustomButton {
+            text: "Start Calibration"
+            onClicked: outfield.text = "Calibration Started"
+            // {dataHandler.calibration();
+            // enabled: SensorSupport.hasAccelerometer()
+        }
+
+        CustomButton {
             text: "Start Pattern"
             // onClicked: stack.pusher("Accelerometer.qml")
             // enabled: SensorSupport.hasAccelerometer()
@@ -107,6 +114,26 @@ ApplicationWindow {
             zText: "Z: " + gyroscope.z.toFixed(2)
             zValue: 0.5 + (gyroscope.z / 1000)
         }
+
+        Text {
+            id: outfield
+            text: qsTr("Welcome")
+        }
+
+        Text {
+            id: movementout
+            text: qsTr("Movement: 0")
+        }
+
+        Text {
+            id: rotationout
+            text: qsTr("Rotation: 0")
+        }
+
+        Text {
+            id: authenticationout
+            text: qsTr("Authentication: 0")
+        }
     }
     Accelerometer {
         id: accelerometer
@@ -120,6 +147,7 @@ ApplicationWindow {
             x = (reading as AccelerometerReading).x
             y = (reading as AccelerometerReading).y
             z = (reading as AccelerometerReading).z
+            dataHandler.accReading(x,y)
         }
 
     }
@@ -137,6 +165,43 @@ ApplicationWindow {
             x = (reading as GyroscopeReading).x
             y = (reading as GyroscopeReading).y
             z = (reading as GyroscopeReading).z
+            dataHandler.gyroReading(z)
+        }
+    }
+
+    DataReadingHandler{
+        id: dataHandler
+        onMovementChanged: {
+            console.log("Movement: " + dataHandler.movement)
+            movementout.text = "Movement: " + dataHandler.movement
+        }
+
+        onRotationZChanged: {
+            console.log("Rotation: " + dataHandler.rotation)
+            rotationout.text = "Rotation: " + dataHandler.rotation
+        }
+
+        onVelocityXChanged: {
+            console.log("VelocityX: " + dataHandler.velocity)
+        }
+
+        onVelocityYChanged: {
+            console.log("VelocityY: " + dataHandler.velocity)
+        }
+
+        onAccActiveChanged: {
+            if (dataHandler.accActive) {
+                accelerometer.start();
+            } else {
+                accelerometer.stop();
+            }
+        }
+        onGyroActiveChanged: {
+            if (dataHandler.gyroActive) {
+                gyroscope.start();
+            } else {
+                gyroscope.stop();
+            }
         }
     }
 
