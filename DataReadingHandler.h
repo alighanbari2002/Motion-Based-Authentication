@@ -29,10 +29,13 @@ public:
     DataReadingHandler();
     Q_INVOKABLE void accReading(double accX, double accY);
     Q_INVOKABLE void gyroReading(double gyroV);
+    Q_INVOKABLE void startPattern();
+    Q_INVOKABLE void stopPattern();
+    Q_INVOKABLE void startCalibration();
 
-    enum ReadingState { Initial, MoveX, MoveY, Rotation };
+    enum ReadingState { Idle, Calibration, Initial, MoveX, MoveY, Rotation };
     Q_ENUM(ReadingState)
-    ReadingState state = Initial;
+    ReadingState state = Idle;
 
     enum MoveDirection { Left, Right, Up, Down };
     Q_ENUM(MoveDirection)
@@ -75,10 +78,18 @@ private:
     double prevAccY = 0;
     double prevRotation = 0;
 
+    // Constants
     const double accThresh = 0.3;
     const double rotationThresh = 0.3;
     const double datarate = 25;
 
+    // Thresholds
+    const int calibrationLimit = 100;
+    const double stationaryAccXThresh = 0.1;
+    const double stationaryAccYThresh = 0.1;
+    const double stationaryRotationThresh = 0.1;
+
+    // Q_PROPERTY values
     double m_movement = 0;
     double m_velocityX = 0;
     double m_velocityY = 0;
@@ -86,9 +97,22 @@ private:
     bool m_gyroActive = 0;
     bool m_accActive = 0;
 
+    // Calibration variables
+    double accXSum = 0;
+    double accXCount = 0;
+    double accYSum = 0;
+    double accYCount = 0;
+    double rotationSum = 0;
+    double rotationCount = 0;
+    double rotationNoise = 0;
+    double accXnoise = 0;
+    double accYnoise = 0;
+
     void handleMovementX(double a);
     void handleMovementY(double a);
     void handleRotation(double gyroV);
+    void updateCalibrationInfo(double newData, double &sum, double &count);
+    void stopCalibration();
 
 };
 

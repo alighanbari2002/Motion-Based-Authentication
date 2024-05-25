@@ -4,7 +4,17 @@ DataReadingHandler::DataReadingHandler() {}
 
 void DataReadingHandler::accReading(double accX, double accY)
 {
-    if(state == Initial && fabs(prevAccX - accX) > accThresh)
+    if(state == Idle)
+    {
+        return;
+    }
+    else if(state == Calibration)
+    {
+        updateCalibrationInfo(accX, accXSum, accXCount);
+        updateCalibrationInfo(accX, accYSum, accYCount);
+
+    }
+    else if(state == Initial && fabs(prevAccX - accX) > accThresh)
     {
         state = MoveX;
         setgyroActive(false);
@@ -32,6 +42,14 @@ void DataReadingHandler::accReading(double accX, double accY)
 
 void DataReadingHandler::gyroReading(double gyroV)
 {
+    if(state == Idle)
+    {
+        return;
+    }
+    else if(state == Calibration)
+    {
+        updateCalibrationInfo(gyroV, rotationSum, rotationCount);
+    }
     if(state == Initial && fabs(prevRotation - gyroV) > rotationThresh)
     {
         state = Rotation;
@@ -45,6 +63,31 @@ void DataReadingHandler::gyroReading(double gyroV)
     {
         return;
     }
+}
+
+void DataReadingHandler::startPattern()
+{
+    state = Initial;
+}
+
+void DataReadingHandler::stopPattern()
+{
+    state = Idle;
+    // TODO: save pattern
+}
+
+void DataReadingHandler::startCalibration()
+{
+    state = Calibration;
+    accXSum = 0;
+    accXCount = 0;
+    accYSum = 0;
+    accYCount = 0;
+    rotationSum = 0;
+    rotationCount = 0;
+    rotationNoise = 0;
+    accXnoise = 0;
+    accYnoise = 0;
 }
 
 double DataReadingHandler::movement() const
@@ -127,35 +170,58 @@ void DataReadingHandler::setaccActive(bool newAccActive)
 
 void DataReadingHandler::handleMovementX(double a)
 {
+    a -= accXnoise;
     double v = m_velocityX + ((a + prevAccX)/2)/datarate;
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX + m_movement;
-    if(v <= 0)
+    if(v <= stationaryAccXThresh)
     {
+        // TODO: save action
         v = 0;
         x = 0;
         setgyroActive(true);
         state = Initial;
     }
+    prevAccX = a;
     setvelocityX(v);
     setMovement(x);
 }
 
 void DataReadingHandler::handleMovementY(double a)
 {
+    a -= accYnoise;
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY + m_movement;
-    if(v <= 0)
+    if(v <= stationaryAccYThresh)
     {
+        // TODO: save action
         v = 0;
         x = 0;
         setgyroActive(true);
         state = Initial;
     }
+    prevAccY = a;
     setvelocityY(v);
     setMovement(x);
 }
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
+}
 
+void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count)
+{
+    sum += newData;
+    count++;
+    if(count > 100)
+    {
+        stopCalibration();
+    }
+}
+
+void DataReadingHandler::stopCalibration()
+{
+    rotationNoise = rotationSum / rotationCount;
+    accXnoise = accXSum / accXCount;
+    accXnoise = accXSum / accXCount;
+    state = Idle;
 }
