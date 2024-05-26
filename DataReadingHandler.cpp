@@ -1,5 +1,4 @@
 #include "DataReadingHandler.h"
-#include "qmetaobject.h"
 #include <QDebug>
 #include <iostream>
 

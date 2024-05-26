@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtSensors
 import com.DataReadingHandler.h 1.0
+import com.logger.h
 
 
 ApplicationWindow {
@@ -64,12 +65,14 @@ ApplicationWindow {
         CustomButton {
             text: "Start Pattern"
             onClicked: {outfield.text = "Pattern Started";
-                dataHandler.startPattern()}
+                dataHandler.startPattern();
+            }
         }
         CustomButton {
             text: "Stop Pattern"
             onClicked: {outfield.text = "Pattern Stopped";
-                dataHandler.stopPattern()}
+                dataHandler.stopPattern();
+            }
         }
         CustomButton {
             text: "Start Authentication"
