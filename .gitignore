@@ -73,3 +73,6 @@ CMakeLists.txt.user*
 *.exe
 build/
 
+# Doc related files
+~$*.docx
+*.tmp
