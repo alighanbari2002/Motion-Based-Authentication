@@ -8,6 +8,8 @@ void DataReadingHandler::accReading(double accX, double accY)
 {
     if(state == Idle)
     {
+        setaccActive(false);
+        setgyroActive(false);
         return;
     }
     else if(state == Calibration)
@@ -18,6 +20,8 @@ void DataReadingHandler::accReading(double accX, double accY)
     }
     else if(state == Initial)
     {
+        accX -= accXnoise;
+        accY -= accYnoise;
         if((fabs(prevAccX - accX) > accThresh) || (fabs(prevAccY - accY) > accThresh))
         {
             std::cout << "Initial movement detected" << std::endl;
@@ -55,17 +59,23 @@ void DataReadingHandler::gyroReading(double gyroV)
 {
     if(state == Idle)
     {
+        setaccActive(false);
+        setgyroActive(false);
         return;
     }
     else if(state == Calibration)
     {
         updateCalibrationInfo(gyroV, rotationSum, rotationCount);
     }
-    if(state == Initial && fabs(prevRotation - gyroV) > rotationThresh)
+    else if(state == Initial)
     {
-        std::cout << "Initial rotation detected" << std::endl;
-        state = Rotation;
-        setaccActive(false);
+        gyroV -= rotationNoise;
+        if(fabs(prevRotation - gyroV) > rotationThresh)
+        {
+            std::cout << "Initial rotation detected" << std::endl;
+            state = Rotation;
+            setaccActive(false);
+        }
     }
     else if(state == Rotation)
     {
@@ -79,11 +89,15 @@ void DataReadingHandler::gyroReading(double gyroV)
 
 void DataReadingHandler::startPattern()
 {
+    setaccActive(true);
+    setgyroActive(true);
     state = Initial;
 }
 
 void DataReadingHandler::stopPattern()
 {
+    setaccActive(false);
+    setgyroActive(false);
     state = Idle;
     // TODO: save pattern
 }

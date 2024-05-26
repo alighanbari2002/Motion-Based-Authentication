@@ -87,7 +87,7 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.05;
+    const double accThresh = 0.1;
     const double rotationThresh = 10;
     const double datarate = 25;
 
@@ -102,8 +102,8 @@ private:
     double m_velocityX = 0;
     double m_velocityY = 0;
     double m_rotationZ = 0;
-    bool m_gyroActive = 0;
-    bool m_accActive = 0;
+    bool m_gyroActive = true;
+    bool m_accActive = true;
 
     // Calibration variables
     double accXSum = 0;
