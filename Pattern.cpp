@@ -4,7 +4,10 @@ Pattern::Pattern() {}
 
 void Pattern::startNewPattern()
 {
-    pattern.clear();
+    while(pattern.count() > 0)
+    {
+        pattern.pop_back();
+    }
 }
 
 void Pattern::addNewSequence(double movement, QString direction, double angle)
@@ -25,18 +28,18 @@ bool Pattern::isPatternMatch(Pattern source, Pattern tobeAuthed)
     }
     for(int i = 0; i < source.pattern.size(); i++)
     {
-        double moveLowerBound = source.pattern.at(i)["movement"](1-moveTolerance);
-        double moveHigherBound = source.pattern.at(i)["movement"](1+moveTolerance);
-        double angleLowerBound = source.pattern.at(i)["angle"](1-angleTolerance);
-        double angleHigherBound = source.pattern.at(i)["angle"](1+angleTolerance);
+        double moveLowerBound = source.pattern.at(i).toObject().value("movement").toDouble() * (1-moveTolerance);
+        double moveHigherBound = source.pattern.at(i).toObject().value("movement").toDouble() * (1+moveTolerance);
+        double angleLowerBound = source.pattern.at(i).toObject().value("angle").toDouble() * (1-angleTolerance);
+        double angleHigherBound = source.pattern.at(i).toObject().value("angle").toDouble() * (1+angleTolerance);
 
-        if(moveLowerBound > tobeAuthed.pattern.at(i)["movement"] ||
-            moveHigherBound < tobeAuthed.pattern.at(i)["movement"])
+        if(moveLowerBound > tobeAuthed.pattern.at(i).toObject().value("movement").toDouble() ||
+            moveHigherBound < tobeAuthed.pattern.at(i).toObject().value("movement").toDouble())
         {
             return false;
         }
-        if(angleLowerBound > tobeAuthed.pattern.at(i)["angle"] ||
-            angleHigherBound < tobeAuthed.pattern.at(i)["angle"])
+        if(angleLowerBound > tobeAuthed.pattern.at(i).toObject().value("angle").toDouble() ||
+            angleHigherBound < tobeAuthed.pattern.at(i).toObject().value("angle").toDouble())
         {
             return false;
         }

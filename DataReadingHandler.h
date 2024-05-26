@@ -45,6 +45,15 @@ public:
     enum MoveDirection { Left, Right, Up, Down };
     Q_ENUM(MoveDirection)
 
+    static QString moveDirectionToString(MoveDirection direction);
+
+    // const QString moveDirection[] = {
+    //     [Left] "Left",
+    //     [Right] "Right",
+    //     [Up] "Up",
+    //     [Down] "Down"
+    // };
+
     double movement() const;
     void setMovement(double newMovement);
 
