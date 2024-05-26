@@ -216,7 +216,8 @@ void DataReadingHandler::handleMovementX(double a)
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
     if(v <= stationaryAccXThresh)
     {
-        authSource.addNewSequence(x, moveDirectionToString(currentDirection), m_rotationZ);
+        auto it = DirectionMap.find(currentDirection);
+        authSource.addNewSequence(x, it->second , m_rotationZ);
         std::cout << "Velocity X ended" << std::endl;
         v = 0;
         x = 0;
@@ -235,7 +236,8 @@ void DataReadingHandler::handleMovementY(double a)
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
     if(v <= stationaryAccYThresh)
     {
-        authSource.addNewSequence(x,  moveDirectionToString(currentDirection), m_rotationZ);
+        auto it = DirectionMap.find(currentDirection);
+        authSource.addNewSequence(x, it->second , m_rotationZ);
         std::cout << "Velocity Y ended" << std::endl;
         v = 0;
         x = 0;
@@ -254,7 +256,8 @@ void DataReadingHandler::handleRotation(double gyroV)
     if(gyroV <= rotationThresh)
     {
         std::cout << "Rotation ended" << std::endl;
-        authSource.addNewSequence(m_movement,  moveDirectionToString(currentDirection), teta);
+        auto it = DirectionMap.find(currentDirection);
+        authSource.addNewSequence(m_movement, it->second  , teta);
         teta = 0;
         setaccActive(true);
         state = Initial;
@@ -297,10 +300,3 @@ void DataReadingHandler::setCalibration(const QString &newCalibration)
     emit calibrationChanged();
 }
 
-QString DataReadingHandler::moveDirectionToString(MoveDirection direction)
-{
-    const QMetaObject metaObject = DataReadingHandler::staticMetaObject;
-    int index = metaObject.indexOfEnumerator("MoveDirection");
-    QMetaEnum metaEnum = metaObject.enumerator(index);
-    return QString::fromLatin1(metaEnum.valueToKey(direction));
-}
