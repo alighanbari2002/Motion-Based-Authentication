@@ -119,6 +119,16 @@ ApplicationWindow {
             id: movementout
             text: qsTr("Movement: 0")
         }
+        
+        Text {
+            id: yvelocityout
+            text: qsTr("Velocity Y: 0")
+        }
+        
+        Text {
+            id: xvelocityout
+            text: qsTr("Velocity X: 0")
+        }
 
         Text {
             id: rotationout
@@ -178,10 +188,12 @@ ApplicationWindow {
 
         onVelocityXChanged: {
             console.log("VelocityX: " + dataHandler.velocityX)
+            xvelocityout.text = "Velocity X: " + dataHandler.velocityX
         }
 
         onVelocityYChanged: {
             console.log("VelocityY: " + dataHandler.velocityY)
+            yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
         }
 
         onAccActiveChanged: {
@@ -202,11 +214,5 @@ ApplicationWindow {
             console.log("Calibration: " + dataHandler.calibration)
             authenticationout.text = "Calibration: " + dataHandler.calibration
         }
-    }
-
-    function myfunc() {
-        thetext.font.pixelSize++;
-        console.log("I am clicked!");
-        hidrect.isvisible = !hidrect.isvisible
     }
 }

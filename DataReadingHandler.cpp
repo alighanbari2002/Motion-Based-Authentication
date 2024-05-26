@@ -16,17 +16,26 @@ void DataReadingHandler::accReading(double accX, double accY)
         updateCalibrationInfo(accY, accYSum, accYCount);
 
     }
-    else if(state == Initial && fabs(prevAccX - accX) > accThresh)
+    else if(state == Initial)
     {
-        state = MoveX;
-        setgyroActive(false);
-        currentDirection = (accX > 0) ? Right : Left;
-    }
-    else if(state == Initial && fabs(prevAccY - accY) > accThresh)
-    {
-        state = MoveY;
-        setgyroActive(false);
-        currentDirection = (accY > 0) ? Up : Down;
+        if((fabs(prevAccX - accX) > accThresh) || (fabs(prevAccY - accY) > accThresh))
+        {
+            std::cout << "Initial movement detected" << std::endl;
+            if(fabs(prevAccX - accX) > fabs(prevAccY - accY))
+            {
+                std::cout << "MoveX detected" << std::endl;
+                state = MoveX;
+                setgyroActive(false);
+                currentDirection = (accX > 0) ? Right : Left;
+            }
+            else
+            {
+                std::cout << "MoveY detected" << std::endl;
+                state = MoveY;
+                setgyroActive(false);
+                currentDirection = (accY > 0) ? Up : Down;
+            }
+        }
     }
     else if(state == MoveX)
     {
@@ -54,6 +63,7 @@ void DataReadingHandler::gyroReading(double gyroV)
     }
     if(state == Initial && fabs(prevRotation - gyroV) > rotationThresh)
     {
+        std::cout << "Initial rotation detected" << std::endl;
         state = Rotation;
         setaccActive(false);
     }
@@ -176,10 +186,11 @@ void DataReadingHandler::handleMovementX(double a)
 {
     a -= accXnoise;
     double v = m_velocityX + ((a + prevAccX)/2)/datarate;
-    double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX + m_movement;
+    double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
     if(v <= stationaryAccXThresh)
     {
         // TODO: save action
+        std::cout << "Velocity X ended" << std::endl;
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -194,10 +205,11 @@ void DataReadingHandler::handleMovementY(double a)
 {
     a -= accYnoise;
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
-    double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY + m_movement;
+    double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
     if(v <= stationaryAccYThresh)
     {
         // TODO: save action
+        std::cout << "Velocity Y ended" << std::endl;
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -214,6 +226,7 @@ void DataReadingHandler::handleRotation(double gyroV)
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
     if(gyroV <= rotationThresh)
     {
+        std::cout << "Rotation ended" << std::endl;
         //TODO: save action
         teta = 0;
         setaccActive(true);

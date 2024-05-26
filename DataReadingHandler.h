@@ -87,8 +87,8 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.3;
-    const double rotationThresh = 5;
+    const double accThresh = 0.05;
+    const double rotationThresh = 10;
     const double datarate = 25;
 
     // Thresholds
