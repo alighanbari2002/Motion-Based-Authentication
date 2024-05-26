@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "Pattern.h"
+
 class DataReadingHandler : public QObject
 {
     Q_OBJECT
@@ -116,6 +118,11 @@ private:
     double accXnoise = 0;
     double accYnoise = 0;
 
+    // Pattern
+    Pattern authSource;
+    Pattern toBeAuthed;
+
+    // Functions
     void handleMovementX(double a);
     void handleMovementY(double a);
     void handleRotation(double gyroV);

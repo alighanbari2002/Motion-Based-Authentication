@@ -89,9 +89,13 @@ void DataReadingHandler::gyroReading(double gyroV)
 
 void DataReadingHandler::startPattern()
 {
-    setaccActive(true);
-    setgyroActive(true);
-    state = Initial;
+    if(state == Idle)
+   {
+        setaccActive(true);
+        setgyroActive(true);
+        state = Initial;
+        auth.startNewPattern();
+    }
 }
 
 void DataReadingHandler::stopPattern()
@@ -99,7 +103,13 @@ void DataReadingHandler::stopPattern()
     setaccActive(false);
     setgyroActive(false);
     state = Idle;
-    // TODO: save pattern
+
+    setMovement(0);
+    setvelocityX(0);
+    setvelocityY(0);
+    setRotationZ(0);
+    setgyroActive(false);
+    setaccActive(false);
 }
 
 void DataReadingHandler::startCalibration()
@@ -203,7 +213,7 @@ void DataReadingHandler::handleMovementX(double a)
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
     if(v <= stationaryAccXThresh)
     {
-        // TODO: save action
+        authSource.addNewSequence(x, currentDirection, m_rotationZ);
         std::cout << "Velocity X ended" << std::endl;
         v = 0;
         x = 0;
@@ -222,7 +232,7 @@ void DataReadingHandler::handleMovementY(double a)
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
     if(v <= stationaryAccYThresh)
     {
-        // TODO: save action
+        authSource.addNewSequence(x, currentDirection, m_rotationZ);
         std::cout << "Velocity Y ended" << std::endl;
         v = 0;
         x = 0;
@@ -241,7 +251,7 @@ void DataReadingHandler::handleRotation(double gyroV)
     if(gyroV <= rotationThresh)
     {
         std::cout << "Rotation ended" << std::endl;
-        //TODO: save action
+        authSource.addNewSequence(m_movement, currentDirection, teta);
         teta = 0;
         setaccActive(true);
         state = Initial;
