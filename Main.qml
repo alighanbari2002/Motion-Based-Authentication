@@ -57,30 +57,25 @@ ApplicationWindow {
 
         CustomButton {
             text: "Start Calibration"
-            onClicked: outfield.text = "Calibration Started"
-            // {dataHandler.calibration();
-            // enabled: SensorSupport.hasAccelerometer()
+            onClicked: {outfield.text = "Calibration Started";
+                dataHandler.startCalibration()}
         }
 
         CustomButton {
             text: "Start Pattern"
-            // onClicked: stack.pusher("Accelerometer.qml")
-            // enabled: SensorSupport.hasAccelerometer()
+            onClicked: {outfield.text = "Pattern Started";
+                dataHandler.startPattern()}
         }
         CustomButton {
             text: "Stop Pattern"
-            // onClicked: stack.pusher("Proximity.qml")
-            // enabled: SensorSupport.hasProximity()
+            onClicked: {outfield.text = "Pattern Stopped";
+                dataHandler.stopPattern()}
         }
         CustomButton {
             text: "Start Authentication"
-            // onClicked: stack.pusher("Compass.qml")
-            // enabled: SensorSupport.hasCompass()
         }
         CustomButton {
             text: "Stop Authentication"
-            // onClicked: stack.pusher("Magnetometer.qml")
-            // enabled: SensorSupport.hasMagnetometer()
         }
 
         Text {
@@ -123,6 +118,16 @@ ApplicationWindow {
         Text {
             id: movementout
             text: qsTr("Movement: 0")
+        }
+        
+        Text {
+            id: yvelocityout
+            text: qsTr("Velocity Y: 0")
+        }
+        
+        Text {
+            id: xvelocityout
+            text: qsTr("Velocity X: 0")
         }
 
         Text {
@@ -177,16 +182,18 @@ ApplicationWindow {
         }
 
         onRotationZChanged: {
-            console.log("Rotation: " + dataHandler.rotation)
-            rotationout.text = "Rotation: " + dataHandler.rotation
+            console.log("Rotation: " + dataHandler.rotationZ)
+            rotationout.text = "Rotation: " + dataHandler.rotationZ
         }
 
         onVelocityXChanged: {
-            console.log("VelocityX: " + dataHandler.velocity)
+            console.log("VelocityX: " + dataHandler.velocityX)
+            xvelocityout.text = "Velocity X: " + dataHandler.velocityX
         }
 
         onVelocityYChanged: {
-            console.log("VelocityY: " + dataHandler.velocity)
+            console.log("VelocityY: " + dataHandler.velocityY)
+            yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
         }
 
         onAccActiveChanged: {
@@ -203,11 +210,9 @@ ApplicationWindow {
                 gyroscope.stop();
             }
         }
-    }
-
-    function myfunc() {
-        thetext.font.pixelSize++;
-        console.log("I am clicked!");
-        hidrect.isvisible = !hidrect.isvisible
+        onCalibrationChanged: {
+            console.log("Calibration: " + dataHandler.calibration)
+            authenticationout.text = "Calibration: " + dataHandler.calibration
+        }
     }
 }
