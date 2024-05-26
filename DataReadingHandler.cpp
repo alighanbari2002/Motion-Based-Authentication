@@ -31,6 +31,7 @@ void DataReadingHandler::accReading(double accX, double accY)
                 state = MoveX;
                 setgyroActive(false);
                 currentDirection = (accX > 0) ? Right : Left;
+                prevAccX = accX;
             }
             else
             {
@@ -38,6 +39,7 @@ void DataReadingHandler::accReading(double accX, double accY)
                 state = MoveY;
                 setgyroActive(false);
                 currentDirection = (accY > 0) ? Up : Down;
+                prevAccY = accY;
             }
         }
     }
@@ -75,6 +77,7 @@ void DataReadingHandler::gyroReading(double gyroV)
             std::cout << "Initial rotation detected" << std::endl;
             state = Rotation;
             setaccActive(false);
+            prevRotation = gyroV;
         }
     }
     else if(state == Rotation)
@@ -108,8 +111,6 @@ void DataReadingHandler::stopPattern()
     setvelocityX(0);
     setvelocityY(0);
     setRotationZ(0);
-    setgyroActive(false);
-    setaccActive(false);
 }
 
 void DataReadingHandler::startCalibration()
@@ -213,17 +214,19 @@ void DataReadingHandler::handleMovementX(double a)
     a -= accXnoise;
     double v = m_velocityX + ((a + prevAccX)/2)/datarate;
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
+    prevAccX = a;
+    countx += 1;
     if(v <= stationaryAccXThresh)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
-        std::cout << "Velocity X ended" << std::endl;
         v = 0;
         x = 0;
         setgyroActive(true);
         state = Initial;
+        prevAccX = 0;
+        countx = 0;
     }
-    prevAccX = a;
     setvelocityX(v);
     setMovement(x);
 }
@@ -233,17 +236,19 @@ void DataReadingHandler::handleMovementY(double a)
     a -= accYnoise;
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
+    prevAccY = a;
+    county += 1;
     if(v <= stationaryAccYThresh)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
-        std::cout << "Velocity Y ended" << std::endl;
         v = 0;
         x = 0;
         setgyroActive(true);
         state = Initial;
+        prevAccY = 0;
+        county = 0;
     }
-    prevAccY = a;
     setvelocityY(v);
     setMovement(x);
 }
@@ -252,16 +257,18 @@ void DataReadingHandler::handleRotation(double gyroV)
 {
     gyroV -= rotationNoise;
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
+    prevRotation = gyroV;
+    countz += 1;
     if(gyroV <= rotationThresh)
     {
-        std::cout << "Rotation ended" << std::endl;
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(m_movement, it->second  , teta);
         teta = 0;
         setaccActive(true);
         state = Initial;
+        prevRotation = 0;
+        countz = 0;
     }
-    prevRotation = gyroV;
     setRotationZ(teta);}
 
 void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count)

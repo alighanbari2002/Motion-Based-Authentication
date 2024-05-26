@@ -72,6 +72,7 @@ ApplicationWindow {
             text: "Stop Pattern"
             onClicked: {outfield.text = "Pattern Stopped";
                 dataHandler.stopPattern();
+                console.log("Stop pattern")
             }
         }
         CustomButton {
@@ -155,6 +156,9 @@ ApplicationWindow {
             x = (reading as AccelerometerReading).x
             y = (reading as AccelerometerReading).y
             z = (reading as AccelerometerReading).z
+            // xvelocityout.text = "Velocity X: " + x
+            // yvelocityout.text = "Velocity Y: " + y
+            console.log("X: " + x + " Y: " + y)
             dataHandler.accReading(x,y)
         }
 
@@ -173,44 +177,58 @@ ApplicationWindow {
             x = (reading as GyroscopeReading).x
             y = (reading as GyroscopeReading).y
             z = (reading as GyroscopeReading).z
+            // rotationout.text = "Rotation: " + z
+            console.log("Z: " + z)
             dataHandler.gyroReading(z)
         }
     }
 
     DataReadingHandler{
         id: dataHandler
-        onMovementChanged: {
-            console.log("Movement: " + dataHandler.movement)
-            movementout.text = "Movement: " + dataHandler.movement
-        }
+        // onMovementChanged: {
+        //     console.log("Movement: " + dataHandler.movement)
+        //     movementout.text = "Movement: " + dataHandler.movement
+        // }
 
-        onRotationZChanged: {
-            console.log("Rotation: " + dataHandler.rotationZ)
-            rotationout.text = "Rotation: " + dataHandler.rotationZ
-        }
+        // onRotationZChanged: {
+        //     console.log("Rotation: " + dataHandler.rotationZ)
+        //     rotationout.text = "Rotation: " + dataHandler.rotationZ
+        // }
 
-        onVelocityXChanged: {
-            console.log("VelocityX: " + dataHandler.velocityX)
-            xvelocityout.text = "Velocity X: " + dataHandler.velocityX
-        }
+        // onVelocityXChanged: {
+        //     console.log("VelocityX: " + dataHandler.velocityX)
+        //     xvelocityout.text = "Velocity X: " + dataHandler.velocityX
+        // }
 
-        onVelocityYChanged: {
-            console.log("VelocityY: " + dataHandler.velocityY)
-            yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
-        }
+        // onVelocityYChanged: {
+        //     console.log("VelocityY: " + dataHandler.velocityY)
+        //     yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
+        // }
 
         onAccActiveChanged: {
             if (dataHandler.accActive) {
                 accelerometer.start();
+                console.log("Acc activity:",accelerometer.active)
+                // accelerometer.active = true;
+                console.log("Acc Active")
             } else {
                 accelerometer.stop();
+                console.log("Acc activity:",accelerometer.active)
+                // accelerometer.active = false;
+                console.log("Acc Inactive")
             }
         }
         onGyroActiveChanged: {
             if (dataHandler.gyroActive) {
+                // gyroscope.active = true;
                 gyroscope.start();
+                console.log("Gyro activity:",gyroscope.active)
+                console.log("Gyro Active")
             } else {
                 gyroscope.stop();
+                console.log("Gyro activity:",gyroscope.active)
+                // gyroscope.active = false;
+                console.log("Gyro Inactive")
             }
         }
         onCalibrationChanged: {

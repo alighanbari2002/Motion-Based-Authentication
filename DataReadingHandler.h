@@ -137,6 +137,11 @@ private:
     void stopCalibration();
 
     QString m_calibration;
+
+    //tests
+    int county = 0;
+    int countx = 0;
+    int countz = 0;
 };
 
 #endif // DATAREADINGHANDLER_H
