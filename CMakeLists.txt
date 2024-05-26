@@ -40,7 +40,7 @@ target_link_libraries(appQtSensorAuth
 )
 
 include(GNUInstallDirs)
-install(TARGETS appnewAuth
+install(TARGETS appQtSensorAuth
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
