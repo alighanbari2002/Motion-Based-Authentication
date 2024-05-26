@@ -67,13 +67,23 @@ void DataReadingHandler::gyroReading(double gyroV)
 
 void DataReadingHandler::startPattern()
 {
-    state = Initial;
+    if(state == Idle)
+    {
+        state = Initial;
+        auth.startNewPattern();
+    }
 }
 
 void DataReadingHandler::stopPattern()
 {
     state = Idle;
-    // TODO: save pattern
+
+    setMovement(0);
+    setvelocityX(0);
+    setvelocityY(0);
+    setRotationZ(0);
+    setgyroActive(false);
+    setaccActive(false);
 }
 
 void DataReadingHandler::startCalibration()
@@ -176,7 +186,7 @@ void DataReadingHandler::handleMovementX(double a)
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX + m_movement;
     if(v <= stationaryAccXThresh)
     {
-        // TODO: save action
+        authSource.addNewSequence(x, currentDirection, m_rotationZ);
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -194,7 +204,7 @@ void DataReadingHandler::handleMovementY(double a)
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY + m_movement;
     if(v <= stationaryAccYThresh)
     {
-        // TODO: save action
+        authSource.addNewSequence(x, currentDirection, m_rotationZ);
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -210,6 +220,7 @@ void DataReadingHandler::handleRotation(double gyroV)
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
     if(teta <= 0)
     {
+        authSource.addNewSequence(m_movement, currentDirection, teta);
         teta = 0;
         setaccActive(true);
         state = Initial;
@@ -233,4 +244,3 @@ void DataReadingHandler::stopCalibration()
     accXnoise = accXSum / accXCount;
     state = Idle;
 }
-

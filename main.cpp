@@ -1,7 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include "DataReadingHandler.h"
-#include <QSensorFilter>
 
 int main(int argc, char *argv[])
 {

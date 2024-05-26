@@ -17,9 +17,10 @@ qt_add_qml_module(appQtSensorAuth
     VERSION 1.0
     QML_FILES
         Main.qml
-        SOURCES
         SOURCES DataReadingHandler.h DataReadingHandler.cpp
         QML_FILES ProgressXYZBar.qml
+        SOURCES
+        SOURCES Pattern.h Pattern.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -38,7 +39,7 @@ target_link_libraries(appQtSensorAuth
 )
 
 include(GNUInstallDirs)
-install(TARGETS appQtSensorAuth
+install(TARGETS appnewAuth
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
