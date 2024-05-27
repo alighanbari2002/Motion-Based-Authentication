@@ -58,19 +58,24 @@ ApplicationWindow {
 
         CustomButton {
             text: "Start Calibration"
-            onClicked: {outfield.text = "Calibration Started";
-                dataHandler.startCalibration()}
+            onClicked: {outfield.text = "State: Calibration Started";
+                dataHandler.startCalibration()
+                console.log("Calibration started")
+            }
         }
 
         CustomButton {
             text: "Start Pattern"
-            onClicked: {outfield.text = "Pattern Started";
+            onClicked: {outfield.text = "State: Pattern Started";
+                accelerometer.accsampleCount = 0
+                gyroscope.gyrosampleCount = 0
                 dataHandler.startPattern();
+                console.log("Start pattern")
             }
         }
         CustomButton {
             text: "Stop Pattern"
-            onClicked: {outfield.text = "Pattern Stopped";
+            onClicked: {outfield.text = "State: Pattern Stopped";
                 dataHandler.stopPattern();
                 console.log("Stop pattern")
             }
@@ -88,7 +93,12 @@ ApplicationWindow {
         }
 
         ProgressXYZBar {
+            id: accbar
             Layout.fillWidth: true
+            property bool caldone: false
+            // property double xfiltered: 0
+            // property double yfiltered: 0
+            // property double zfiltered: 0
             // fontSize: root.fontSize
             xText: "X: " + accelerometer.x.toFixed(2)
             xValue: 0.5 + (accelerometer.x / 100)
@@ -96,6 +106,7 @@ ApplicationWindow {
             yValue: 0.5 + (accelerometer.y / 100)
             zText: "Z: " + accelerometer.z.toFixed(2)
             zValue: 0.5 + (accelerometer.z / 100)
+
         }
 
         Text {
@@ -104,6 +115,7 @@ ApplicationWindow {
         }
 
         ProgressXYZBar {
+            id: gyrobar
             Layout.fillWidth: true
             // fontSize: root.fontSize
             xText: "X: " + gyroscope.x.toFixed(2)
@@ -116,7 +128,7 @@ ApplicationWindow {
 
         Text {
             id: outfield
-            text: qsTr("Welcome")
+            text: qsTr("State: Idle")
         }
 
         Text {
@@ -149,17 +161,23 @@ ApplicationWindow {
         property real x: 0
         property real y: 0
         property real z: 0
+        property real accsampleCount: 0
+
         active: true
         dataRate: 25
 
         onReadingChanged: {
-            x = (reading as AccelerometerReading).x
-            y = (reading as AccelerometerReading).y
-            z = (reading as AccelerometerReading).z
-            // xvelocityout.text = "Velocity X: " + x
-            // yvelocityout.text = "Velocity Y: " + y
-            console.log("X: " + x + " Y: " + y)
-            dataHandler.accReading(x,y)
+            if(active == true){
+                accsampleCount += 1
+                x = (reading as AccelerometerReading).x
+                y = (reading as AccelerometerReading).y
+                z = (reading as AccelerometerReading).z
+                // xvelocityout.text = "Velocity X: " + x
+                // yvelocityout.text = "Velocity Y: " + y
+                console.log("X: " + x + " Y: " + y + " " + outfield.text  + " Count:" + accsampleCount
+                            + " AccActive:" + active + " GyroActive:" + gyroscope.active)
+                dataHandler.accReading(x,y)
+            }
         }
 
     }
@@ -169,17 +187,22 @@ ApplicationWindow {
         property real x: 0
         property real y: 0
         property real z: 0
+        property real gyrosampleCount: 0
 
         active: true
         dataRate: 25
 
         onReadingChanged: {
-            x = (reading as GyroscopeReading).x
-            y = (reading as GyroscopeReading).y
-            z = (reading as GyroscopeReading).z
-            // rotationout.text = "Rotation: " + z
-            console.log("Z: " + z)
-            dataHandler.gyroReading(z)
+            if(active == true){
+                gyrosampleCount += 1
+                x = (reading as GyroscopeReading).x
+                y = (reading as GyroscopeReading).y
+                z = (reading as GyroscopeReading).z
+                // rotationout.text = "Rotation: " + z
+                console.log("Z: " + z + " " + outfield.text + " Count:" + gyrosampleCount
+                            + " AccActive:" + accelerometer.active + " GyroActive:" + active)
+                dataHandler.gyroReading(z)
+            }
         }
     }
 
@@ -200,40 +223,51 @@ ApplicationWindow {
         //     xvelocityout.text = "Velocity X: " + dataHandler.velocityX
         // }
 
-        // onVelocityYChanged: {
-        //     console.log("VelocityY: " + dataHandler.velocityY)
-        //     yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
-        // }
+        onVelocityYChanged: {
+            console.log("VelocityY: " + dataHandler.velocityY)
+            yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
+        }
 
         onAccActiveChanged: {
             if (dataHandler.accActive) {
                 accelerometer.start();
                 console.log("Acc activity:",accelerometer.active)
-                // accelerometer.active = true;
                 console.log("Acc Active")
             } else {
                 accelerometer.stop();
                 console.log("Acc activity:",accelerometer.active)
-                // accelerometer.active = false;
                 console.log("Acc Inactive")
             }
         }
         onGyroActiveChanged: {
             if (dataHandler.gyroActive) {
-                // gyroscope.active = true;
                 gyroscope.start();
                 console.log("Gyro activity:",gyroscope.active)
                 console.log("Gyro Active")
             } else {
                 gyroscope.stop();
                 console.log("Gyro activity:",gyroscope.active)
-                // gyroscope.active = false;
                 console.log("Gyro Inactive")
             }
         }
         onCalibrationChanged: {
             console.log("Calibration: " + dataHandler.calibration)
+            outfield.text = "Calibration done"
             authenticationout.text = "Calibration: " + dataHandler.calibration
+            ProgressXYZBar.caldone = true
+
+        }
+        onFilteredXChanged: {
+            accbar.xText = "X: " + dataHandler.filteredX.toFixed(2)
+            accbar.xValue = 0.5 + (dataHandler.filteredX / 100)
+        }
+        onFilteredYChanged:{
+            accbar.yText = "Y: " + dataHandler.filteredY.toFixed(2)
+            accbar.yValue = 0.5 + (dataHandler.filteredY / 100)
+        }
+        onFilteredZChanged: {
+            gyrobar.zText = "Z: " + dataHandler.filteredZ.toFixed(2)
+            accbar.zValue = 0.5 + (dataHandler.filteredZ / 100)
         }
     }
 }

@@ -2,7 +2,7 @@
 #define DATAREADINGHANDLER_H
 
 #include <QObject>
-
+#include <math.h>
 #include "Pattern.h"
 
 class DataReadingHandler : public QObject
@@ -29,6 +29,16 @@ class DataReadingHandler : public QObject
 
     Q_PROPERTY(QString calibration READ calibration WRITE setCalibration
                    NOTIFY calibrationChanged FINAL)
+
+    Q_PROPERTY(double filteredX READ filteredX WRITE setfilteredX
+                   NOTIFY filteredXChanged FINAL)
+
+    Q_PROPERTY(double filteredY READ filteredY WRITE setfilteredY
+                   NOTIFY filteredYChanged FINAL)
+
+    Q_PROPERTY(double filteredZ READ filteredZ WRITE setfilteredZ
+                   NOTIFY filteredZChanged FINAL)
+
 
 public:
     DataReadingHandler();
@@ -73,6 +83,15 @@ public:
     QString calibration() const;
     void setCalibration(const QString &newCalibration);
 
+    double filteredX() const;
+    void setfilteredX(double newFilteredX);
+
+    double filteredY() const;
+    void setfilteredY(double newFilteredY);
+
+    double filteredZ() const;
+    void setfilteredZ(double newFilteredZ);
+
 signals:
     void movementChanged();
 
@@ -89,6 +108,12 @@ signals:
 
     void calibrationChanged();
 
+    void filteredXchange();
+
+    void filteredYchange();
+
+    void filteredZchange();
+
 private:
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
@@ -96,14 +121,14 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.1;
-    const double rotationThresh = 10;
+    const double accThresh = 0.2;
+    const double rotationThresh = 15;
     const double datarate = 25;
 
     // Thresholds
     const int calibrationLimit = 100;
     const double stationaryAccXThresh = 0.15;
-    const double stationaryAccYThresh = 0.15;
+    const double stationaryAccYThresh = 0.0;
     const double stationaryRotationThresh = 0.1;
 
     // Q_PROPERTY values
@@ -124,6 +149,13 @@ private:
     double rotationNoise = 0;
     double accXnoise = 0;
     double accYnoise = 0;
+    // calibration range
+    double accXmax = 0;
+    double accXmin = 0;
+    double accYmax = 0;
+    double accYmin = 0;
+    double rotationMax = 0;
+    double rotationMin = 0;
 
     // Pattern
     Pattern authSource;
@@ -133,7 +165,7 @@ private:
     void handleMovementX(double a);
     void handleMovementY(double a);
     void handleRotation(double gyroV);
-    void updateCalibrationInfo(double newData, double &sum, double &count);
+    void updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min);
     void stopCalibration();
 
     QString m_calibration;
@@ -142,6 +174,15 @@ private:
     int county = 0;
     int countx = 0;
     int countz = 0;
+
+    //check done
+    int countzeroX = 0;
+    int countzeroY = 0;
+    int countzeroZ = 0;
+
+    double m_filteredX;
+    double m_filteredY;
+    double m_filteredZ;
 };
 
 #endif // DATAREADINGHANDLER_H

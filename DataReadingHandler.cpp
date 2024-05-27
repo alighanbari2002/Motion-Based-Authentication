@@ -1,11 +1,33 @@
 #include "DataReadingHandler.h"
 #include <QDebug>
-#include <iostream>
 
 DataReadingHandler::DataReadingHandler() {}
 
+double accXmax = 0;
+double accXmin = 0;
+double accYmax = 0;
+double accYmin = 0;
+double rotationMax = 0;
+double rotationMin = 0;
+
 void DataReadingHandler::accReading(double accX, double accY)
 {
+    double inputx = accX - accXnoise;
+    if(inputx <= accXmax && inputx >= accXmin)
+    {
+        inputx = 0;
+    }
+    double inputy = accY - accYnoise;
+    if(inputy <= accYmax && inputy >= accYmin)
+    {
+        inputy = 0;
+    }
+    if(state != Calibration)
+    {
+        setfilteredX(inputx);
+        setfilteredY(inputy);
+    }
+
     if(state == Idle)
     {
         setaccActive(false);
@@ -14,42 +36,37 @@ void DataReadingHandler::accReading(double accX, double accY)
     }
     else if(state == Calibration)
     {
-        updateCalibrationInfo(accX, accXSum, accXCount);
-        updateCalibrationInfo(accY, accYSum, accYCount);
+        updateCalibrationInfo(accX, accXSum, accXCount, accXmax, accXmin);
+        updateCalibrationInfo(accY, accYSum, accYCount, accYmax, accYmin);
 
     }
     else if(state == Initial)
     {
-        accX -= accXnoise;
-        accY -= accYnoise;
-        if((fabs(prevAccX - accX) > accThresh) || (fabs(prevAccY - accY) > accThresh))
+        if((fabs(prevAccX - inputx) > accThresh) || (fabs(prevAccY - inputy) > accThresh))
         {
-            std::cout << "Initial movement detected" << std::endl;
-            if(fabs(prevAccX - accX) > fabs(prevAccY - accY))
+            if(fabs(prevAccX - inputx) > fabs(prevAccY - inputy))
             {
-                std::cout << "MoveX detected" << std::endl;
                 state = MoveX;
                 setgyroActive(false);
-                currentDirection = (accX > 0) ? Right : Left;
-                prevAccX = accX;
+                currentDirection = (inputx > 0) ? Right : Left;
+                DataReadingHandler::handleMovementX(inputx);
             }
             else
             {
-                std::cout << "MoveY detected" << std::endl;
                 state = MoveY;
                 setgyroActive(false);
-                currentDirection = (accY > 0) ? Up : Down;
-                prevAccY = accY;
+                currentDirection = (inputy > 0) ? Up : Down;
+                DataReadingHandler::handleMovementY(inputy);
             }
         }
     }
     else if(state == MoveX)
     {
-        handleMovementX(accX);
+        handleMovementX(inputx);
     }
     else if(state == MoveY)
     {
-        handleMovementY(accY);
+        handleMovementY(inputy);
     }
     else
     {
@@ -59,6 +76,12 @@ void DataReadingHandler::accReading(double accX, double accY)
 
 void DataReadingHandler::gyroReading(double gyroV)
 {
+    double inputz = gyroV - rotationNoise;
+    if(inputz <= rotationMax && inputz >= rotationMin)
+    {
+        inputz = 0;
+    }
+
     if(state == Idle)
     {
         setaccActive(false);
@@ -67,22 +90,20 @@ void DataReadingHandler::gyroReading(double gyroV)
     }
     else if(state == Calibration)
     {
-        updateCalibrationInfo(gyroV, rotationSum, rotationCount);
+        updateCalibrationInfo(gyroV, rotationSum, rotationCount, rotationMax, rotationMin);
     }
     else if(state == Initial)
     {
-        gyroV -= rotationNoise;
-        if(fabs(prevRotation - gyroV) > rotationThresh)
+        if(fabs(prevRotation - inputz) > rotationThresh)
         {
-            std::cout << "Initial rotation detected" << std::endl;
             state = Rotation;
             setaccActive(false);
-            prevRotation = gyroV;
+            DataReadingHandler::handleRotation(inputz);
         }
     }
     else if(state == Rotation)
     {
-        handleRotation(gyroV);
+        handleRotation(inputz);
     }
     else
     {
@@ -115,7 +136,6 @@ void DataReadingHandler::stopPattern()
 
 void DataReadingHandler::startCalibration()
 {
-    std::cout << "Calibration started" << std::endl;
     setaccActive(true);
     setgyroActive(true);
     state = Calibration;
@@ -128,6 +148,12 @@ void DataReadingHandler::startCalibration()
     rotationNoise = 0;
     accXnoise = 0;
     accYnoise = 0;
+    accXmax = -100;
+    accXmin = 100;
+    accYmin = 100;
+    accYmax = -100;
+    rotationMax = -100;
+    rotationMin = 100;
 }
 
 double DataReadingHandler::movement() const
@@ -211,12 +237,16 @@ void DataReadingHandler::setaccActive(bool newAccActive)
 
 void DataReadingHandler::handleMovementX(double a)
 {
-    a -= accXnoise;
     double v = m_velocityX + ((a + prevAccX)/2)/datarate;
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
     prevAccX = a;
     countx += 1;
-    if(v <= stationaryAccXThresh)
+    if(a == 0)
+        countzeroX += 1;
+    else
+        countzeroX = 0;
+    // if(fabs(v) <= stationaryAccXThresh)
+    if(countzeroX >= 5)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
@@ -226,6 +256,7 @@ void DataReadingHandler::handleMovementX(double a)
         state = Initial;
         prevAccX = 0;
         countx = 0;
+        countzeroX = 0;
     }
     setvelocityX(v);
     setMovement(x);
@@ -233,12 +264,16 @@ void DataReadingHandler::handleMovementX(double a)
 
 void DataReadingHandler::handleMovementY(double a)
 {
-    a -= accYnoise;
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
     prevAccY = a;
     county += 1;
-    if(v <= stationaryAccYThresh)
+    if(a == 0)
+        countzeroY += 1;
+    else
+        countzeroY = 0;
+    // if(fabs(v) <= stationaryAccYThresh)
+    if(countzeroY >= 5)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
@@ -248,6 +283,7 @@ void DataReadingHandler::handleMovementY(double a)
         state = Initial;
         prevAccY = 0;
         county = 0;
+        countzeroY = 0;
     }
     setvelocityY(v);
     setMovement(x);
@@ -255,11 +291,15 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-    gyroV -= rotationNoise;
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
     prevRotation = gyroV;
     countz += 1;
-    if(gyroV <= rotationThresh)
+    if(gyroV == 0)
+        countzeroZ += 1;
+    else
+        countzeroZ = 0;
+    // if(fabs(gyroV) <= rotationThresh)
+    if(countzeroZ >= 5)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(m_movement, it->second  , teta);
@@ -268,13 +308,22 @@ void DataReadingHandler::handleRotation(double gyroV)
         state = Initial;
         prevRotation = 0;
         countz = 0;
+        countzeroZ = 0;
     }
     setRotationZ(teta);}
 
-void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count)
+void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min)
 {
     sum += newData;
     count++;
+    if(newData > max)
+    {
+        max = newData;
+    }
+    if(newData < min)
+    {
+        min = newData;
+    }
     if(count > 100)
     {
         stopCalibration();
@@ -286,10 +335,24 @@ void DataReadingHandler::stopCalibration()
     rotationNoise = rotationSum / rotationCount;
     accXnoise = accXSum / accXCount;
     accYnoise = accYSum / accYCount;
-    QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " + QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
+
+    accXmax = accXmax - accXnoise;
+    accXmin = accXmin - accXnoise;
+    accYmax = accYmax - accYnoise;
+    accYmin = accYmin - accYnoise;
+    rotationMax = rotationMax - rotationNoise;
+    rotationMin = rotationMin - rotationNoise;
+
+    accXmax = accXmax * 1.1;
+    accXmin = accXmin * 1.1;
+    accYmax = accYmax * 1.1;
+    accYmin = accYmin * 1.1;
+    rotationMax = rotationMax * 1.1;
+    rotationMin = rotationMin * 1.1;
+    QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " +
+                  QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
     setCalibration(cal);
     state = Idle;
-
 }
 
 
@@ -306,3 +369,42 @@ void DataReadingHandler::setCalibration(const QString &newCalibration)
     emit calibrationChanged();
 }
 
+
+double DataReadingHandler::filteredX() const
+{
+    return m_filteredX;
+}
+
+void DataReadingHandler::setfilteredX(double newFilteredX)
+{
+    if (qFuzzyCompare(m_filteredX, newFilteredX))
+        return;
+    m_filteredX = newFilteredX;
+    emit filteredXchange();
+}
+
+double DataReadingHandler::filteredY() const
+{
+    return m_filteredY;
+}
+
+void DataReadingHandler::setfilteredY(double newFilteredY)
+{
+    if (qFuzzyCompare(m_filteredY, newFilteredY))
+        return;
+    m_filteredY = newFilteredY;
+    emit filteredYchange();
+}
+
+double DataReadingHandler::filteredZ() const
+{
+    return m_filteredZ;
+}
+
+void DataReadingHandler::setfilteredZ(double newFilteredZ)
+{
+    if (qFuzzyCompare(m_filteredZ, newFilteredZ))
+        return;
+    m_filteredZ = newFilteredZ;
+    emit filteredZchange();
+}
