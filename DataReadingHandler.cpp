@@ -65,14 +65,14 @@ void DataReadingHandler::accReading(double accX, double accY)
             if(fabs(prevAccX - inputx) > fabs(prevAccY - inputy))
             {
                 state = MoveX;
-                setgyroActive(false);
+                // setgyroActive(false);
                 currentDirection = (inputx > 0) ? Right : Left;
                 DataReadingHandler::handleMovementX(inputx);
             }
             else
             {
                 state = MoveY;
-                setgyroActive(false);
+                // setgyroActive(false);
                 currentDirection = (inputy > 0) ? Up : Down;
                 DataReadingHandler::handleMovementY(inputy);
             }
@@ -120,7 +120,8 @@ void DataReadingHandler::gyroReading(double gyroV)
         if(fabs(prevRotation - inputz) > rotationThresh)
         {
             state = Rotation;
-            setaccActive(false);
+            // setaccActive(false);
+            // accThresh = 2;
             DataReadingHandler::handleRotation(inputz);
         }
     }
@@ -272,10 +273,10 @@ void DataReadingHandler::handleMovementX(double a)
     if(countzeroX >= 5)
     {
         auto it = DirectionMap.find(currentDirection);
-        authSource.addNewSequence(x, it->second , m_rotationZ);
-        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second;
+        authSource.addNewSequence(x, it->second , currentrotation);
+        QString newmove = "Movement: " + QString::number(x) + " Direction: " + it->second + " angle: "+
+                          QString::number(currentrotation);
         setNewpattern(newmove);
-
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -309,7 +310,8 @@ void DataReadingHandler::handleMovementY(double a)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
-        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second; ;
+        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second + " angle: "+
+                          QString::number(currentrotation);
         setNewpattern(newmove);
 
         velocityYList.append(v);
@@ -338,19 +340,46 @@ void DataReadingHandler::handleRotation(double gyroV)
     // if(fabs(gyroV) <= rotationThresh)
     if(countzeroZ >= 5)
     {
-        auto it = DirectionMap.find(currentDirection);
-        authSource.addNewSequence(m_movement, it->second  , teta);
-        //curentrotation
-        QString newmove = "Rotation: " + QString::number(teta);
+        int actual = settotalrotation(teta);
+        // auto it = DirectionMap.find(currentDirection);
+        // authSource.addNewSequence(m_movement, it->second  , teta);
+        QString newmove = "Rotation: " + QString::number(teta) + "actual: " + QString::number(actual) ;
         setNewpattern(newmove);
         teta = 0;
         setaccActive(true);
         state = Initial;
         prevRotation = 0;
         countz = 0;
-        countzeroZ = 0;
+        countzeroZ = -0;
+        // accThresh = 1;
     }
     setRotationZ(teta);}
+
+int DataReadingHandler::settotalrotation(double teta)
+{
+    int roundup = 0;
+    while(teta > 360)
+        teta -= 360;
+
+    while(teta < 0)
+        teta += 360;
+
+    if(teta < 45 || teta >= 315)
+        roundup = 0;
+    else if (teta >= 45 && teta < 135)
+        roundup = 90;
+    else if(teta >= 135 && teta < 225)
+        roundup = 180;
+    else if(teta >= 225 && teta < 315)
+        roundup = -90;
+
+    currentrotation += roundup;
+    if(currentrotation >= 360)
+        currentrotation -= 360;
+    if(currentrotation < -90)
+        currentrotation += 360;
+    return roundup;
+}
 
 void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min)
 {

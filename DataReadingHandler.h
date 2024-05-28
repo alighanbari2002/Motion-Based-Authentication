@@ -121,13 +121,14 @@ signals:
     void newpatternChanged();
 
 private:
+    int settotalrotation(double teta);
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
     double prevAccY = 0;
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 2;
+    const double accThresh = 1.2;
     const double rotationThresh = 40;
     const double datarate = 25;
 
@@ -187,7 +188,7 @@ private:
     int countz = 0;
 
     //total
-    double totalrotation = 0;
+    int currentrotation = 0;
 
     // Check done
     int countzeroX = 0;
