@@ -105,14 +105,13 @@ signals:
 
     void accActiveChanged();
 
-
     void calibrationChanged();
 
-    void filteredXchange();
+    void filteredXChanged();
 
-    void filteredYchange();
+    void filteredYChanged();
 
-    void filteredZchange();
+    void filteredZChanged();
 
 private:
     MoveDirection currentDirection = Up;
@@ -138,6 +137,9 @@ private:
     double m_rotationZ = 0;
     bool m_gyroActive = true;
     bool m_accActive = true;
+    double m_filteredX;
+    double m_filteredY;
+    double m_filteredZ;
 
     // Calibration variables
     double accXSum = 0;
@@ -180,10 +182,6 @@ private:
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
-
-    double m_filteredX;
-    double m_filteredY;
-    double m_filteredZ;
 };
 
 #endif // DATAREADINGHANDLER_H

@@ -373,7 +373,7 @@ void DataReadingHandler::setfilteredX(double newFilteredX)
     if (qFuzzyCompare(m_filteredX, newFilteredX))
         return;
     m_filteredX = newFilteredX;
-    emit filteredXchange();
+    emit filteredXChanged();
 }
 
 double DataReadingHandler::filteredY() const
@@ -386,7 +386,7 @@ void DataReadingHandler::setfilteredY(double newFilteredY)
     if (qFuzzyCompare(m_filteredY, newFilteredY))
         return;
     m_filteredY = newFilteredY;
-    emit filteredYchange();
+    emit filteredYChanged();
 }
 
 double DataReadingHandler::filteredZ() const
@@ -399,5 +399,5 @@ void DataReadingHandler::setfilteredZ(double newFilteredZ)
     if (qFuzzyCompare(m_filteredZ, newFilteredZ))
         return;
     m_filteredZ = newFilteredZ;
-    emit filteredZchange();
+    emit filteredZChanged();
 }
