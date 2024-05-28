@@ -3,13 +3,6 @@
 
 DataReadingHandler::DataReadingHandler() {}
 
-double accXmax = 0;
-double accXmin = 0;
-double accYmax = 0;
-double accYmin = 0;
-double rotationMax = 0;
-double rotationMin = 0;
-
 void DataReadingHandler::accReading(double accX, double accY)
 {
     double inputx = accX - accXnoise;

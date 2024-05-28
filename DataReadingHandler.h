@@ -149,7 +149,8 @@ private:
     double rotationNoise = 0;
     double accXnoise = 0;
     double accYnoise = 0;
-    // calibration range
+
+    // Calibration ranges
     double accXmax = 0;
     double accXmin = 0;
     double accYmax = 0;
@@ -170,12 +171,12 @@ private:
 
     QString m_calibration;
 
-    //tests
+    // Tests
     int county = 0;
     int countx = 0;
     int countz = 0;
 
-    //check done
+    // Check done
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
