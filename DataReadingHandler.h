@@ -39,6 +39,8 @@ class DataReadingHandler : public QObject
     Q_PROPERTY(double filteredZ READ filteredZ WRITE setfilteredZ
                    NOTIFY filteredZChanged FINAL)
 
+    Q_PROPERTY(QString newpattern READ newpattern WRITE setNewpattern NOTIFY newpatternChanged FINAL)
+
 
 public:
     DataReadingHandler();
@@ -92,6 +94,9 @@ public:
     double filteredZ() const;
     void setfilteredZ(double newFilteredZ);
 
+    QString newpattern() const;
+    void setNewpattern(const QString &newNewpattern);
+
 signals:
     void movementChanged();
 
@@ -113,6 +118,8 @@ signals:
 
     void filteredZChanged();
 
+    void newpatternChanged();
+
 private:
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
@@ -120,8 +127,8 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.2;
-    const double rotationThresh = 15;
+    const double accThresh = 2;
+    const double rotationThresh = 40;
     const double datarate = 25;
 
     // Thresholds
@@ -159,6 +166,7 @@ private:
     double accYmin = 0;
     double rotationMax = 0;
     double rotationMin = 0;
+    double rangecoef = 1;
 
     // Pattern
     Pattern authSource;
@@ -178,10 +186,14 @@ private:
     int countx = 0;
     int countz = 0;
 
+    //total
+    double totalrotation = 0;
+
     // Check done
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
+    QString m_newpattern;
 };
 
 #endif // DATAREADINGHANDLER_H

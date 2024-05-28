@@ -12,8 +12,8 @@ ColumnLayout {
     property alias xValue: xBar.value
     property alias yText: yBar.text
     property alias yValue: yBar.value
-    property alias zText: zBar.text
-    property alias zValue: zBar.value
+    // property alias zText: zBar.text
+    // property alias zValue: zBar.value
 
     component NamedProgressBar: ColumnLayout {
         property alias text: axes.text
@@ -37,7 +37,7 @@ ColumnLayout {
         id: yBar
     }
 
-    NamedProgressBar {
-        id: zBar
-    }
+    // NamedProgressBar {
+    //     id: zBar
+    // }
 }

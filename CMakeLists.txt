@@ -19,12 +19,13 @@ qt_add_qml_module(appQtSensorAuth
     QML_FILES
         Main.qml
         SOURCES DataReadingHandler.h DataReadingHandler.cpp
-        QML_FILES ProgressXYZBar.qml
+        QML_FILES ProgressXYBar.qml
         SOURCES
         SOURCES Pattern.h Pattern.cpp
         SOURCES logger.h logger.cpp
         RESOURCES
         RESOURCES
+        QML_FILES ProgressZBar.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

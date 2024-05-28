@@ -61,6 +61,12 @@ ApplicationWindow {
             onClicked: {outfield.text = "State: Calibration Started";
                 dataHandler.startCalibration()
                 console.log("Calibration started")
+                xText: "X: " + accelerometer.x.toFixed(2)
+                xValue: 0.5 + (accelerometer.x / 100)
+                yText: "Y: " + accelerometer.y.toFixed(2)
+                yValue: 0.5 + (accelerometer.y / 100)
+                zText: "Z: " + gyroscope.z.toFixed(2)
+                zValue: 0.5 + (gyroscope.z / 1000)
             }
         }
 
@@ -92,7 +98,7 @@ ApplicationWindow {
             text: qsTr("accelerometer data:")
         }
 
-        ProgressXYZBar {
+        ProgressXYBar {
             id: accbar
             Layout.fillWidth: true
             property bool caldone: false
@@ -104,9 +110,6 @@ ApplicationWindow {
             xValue: 0.5 + (accelerometer.x / 100)
             yText: "Y: " + accelerometer.y.toFixed(2)
             yValue: 0.5 + (accelerometer.y / 100)
-            zText: "Z: " + accelerometer.z.toFixed(2)
-            zValue: 0.5 + (accelerometer.z / 100)
-
         }
 
         Text {
@@ -114,14 +117,10 @@ ApplicationWindow {
             text: qsTr("gyroscope data:")
         }
 
-        ProgressXYZBar {
+        ProgressZBar {
             id: gyrobar
             Layout.fillWidth: true
             // fontSize: root.fontSize
-            xText: "X: " + gyroscope.x.toFixed(2)
-            xValue: 0.5 + (gyroscope.x / 1000)
-            yText: "Y: " + gyroscope.y.toFixed(2)
-            yValue: 0.5 + (gyroscope.y / 1000)
             zText: "Z: " + gyroscope.z.toFixed(2)
             zValue: 0.5 + (gyroscope.z / 1000)
         }
@@ -255,8 +254,13 @@ ApplicationWindow {
             outfield.text = "Calibration done"
             authenticationout.text = "Calibration: " + dataHandler.calibration
             ProgressXYZBar.caldone = true
-
         }
+        onNewpatternChanged: {
+            console.log("move: " + dataHandler.newpattern)
+            outfield.text = "New move recorded"
+            authenticationout.text = "New move: " + dataHandler.newpattern
+        }
+
         onFilteredXChanged: {
             accbar.xText = "X: " + dataHandler.filteredX.toFixed(2)
             accbar.xValue = 0.5 + (dataHandler.filteredX / 100)
@@ -266,6 +270,7 @@ ApplicationWindow {
             accbar.yValue = 0.5 + (dataHandler.filteredY / 100)
         }
         onFilteredZChanged: {
+
             gyrobar.zText = "Z: " + dataHandler.filteredZ.toFixed(2)
             accbar.zValue = 0.5 + (dataHandler.filteredZ / 100)
         }

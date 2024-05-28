@@ -5,17 +5,42 @@ DataReadingHandler::DataReadingHandler() {}
 
 void DataReadingHandler::accReading(double accX, double accY)
 {
-    double inputx = accX - accXnoise;
-    if(inputx <= accXmax && inputx >= accXmin)
+    // double inputx = accX - accXnoise;
+    // if(inputx <= accXmax && inputx >= accXmin)
+    // {
+    //     inputx = 0;
+    // }
+    // double inputy = accY - accYnoise;
+    // if(inputy <= accYmax && inputy >= accYmin)
+    // {
+    //     inputy = 0;
+    // }
+    // if(accX <= accX && accX >= accXmin)
+    // {
+    //     accX = 0;
+    // }
+    double inputx;
+    double inputy;
+
+
+    if(accX <= accXmax && accX >= accXmin)
     {
         inputx = 0;
     }
-    double inputy = accY - accYnoise;
-    if(inputy <= accYmax && inputy >= accYmin)
+    else
+    {
+        inputx = accX - accXnoise;
+    }
+    if(accY <= accYmax && accY >= accYmin)
     {
         inputy = 0;
     }
-    if(state != Calibration)
+    else
+    {
+        inputy = accY - accYnoise;
+    }
+
+    if(state != Calibration && state != Idle)
     {
         setfilteredX(inputx);
         setfilteredY(inputy);
@@ -73,6 +98,11 @@ void DataReadingHandler::gyroReading(double gyroV)
     if(inputz <= rotationMax && inputz >= rotationMin)
     {
         inputz = 0;
+    }
+
+    if(state != Calibration)
+    {
+        setfilteredZ(inputz);
     }
 
     if(state == Idle)
@@ -234,7 +264,7 @@ void DataReadingHandler::handleMovementX(double a)
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
     prevAccX = a;
     countx += 1;
-    if(a == 0)
+    if(fabs(a) < 0.5)
         countzeroX += 1;
     else
         countzeroX = 0;
@@ -243,6 +273,9 @@ void DataReadingHandler::handleMovementX(double a)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
+        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second;
+        setNewpattern(newmove);
+
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -257,11 +290,17 @@ void DataReadingHandler::handleMovementX(double a)
 
 void DataReadingHandler::handleMovementY(double a)
 {
+    QList<double> accYList;
+    accYList.append(a);
+    QList<double> velocityYList;
+    velocityYList.append(m_velocityY);
+    QList<double> movementList;
+    movementList.append(m_movement);
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
     prevAccY = a;
     county += 1;
-    if(a == 0)
+    if(fabs(a) < 0.05)
         countzeroY += 1;
     else
         countzeroY = 0;
@@ -270,6 +309,11 @@ void DataReadingHandler::handleMovementY(double a)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
+        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second; ;
+        setNewpattern(newmove);
+
+        velocityYList.append(v);
+        movementList.append(x);
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -287,7 +331,7 @@ void DataReadingHandler::handleRotation(double gyroV)
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
     prevRotation = gyroV;
     countz += 1;
-    if(gyroV == 0)
+    if(fabs(gyroV) < 0.5)
         countzeroZ += 1;
     else
         countzeroZ = 0;
@@ -296,6 +340,9 @@ void DataReadingHandler::handleRotation(double gyroV)
     {
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(m_movement, it->second  , teta);
+        //curentrotation
+        QString newmove = "Rotation: " + QString::number(teta);
+        setNewpattern(newmove);
         teta = 0;
         setaccActive(true);
         state = Initial;
@@ -336,12 +383,18 @@ void DataReadingHandler::stopCalibration()
     rotationMax = rotationMax - rotationNoise;
     rotationMin = rotationMin - rotationNoise;
 
-    accXmax = accXmax * 1.1;
-    accXmin = accXmin * 1.1;
-    accYmax = accYmax * 1.1;
-    accYmin = accYmin * 1.1;
-    rotationMax = rotationMax * 1.1;
-    rotationMin = rotationMin * 1.1;
+    accXmax = accXmax * rangecoef;
+    accXmin = accXmin * rangecoef;
+    accYmax = accYmax * rangecoef;
+    accYmin = accYmin * rangecoef;
+    rotationMax = rotationMax * rangecoef;
+    rotationMin = rotationMin * rangecoef;
+
+    // accXmax = accXnoise + fabs(accXnoise/2);
+    // accXmin = accXnoise - fabs(accXnoise/2);
+    // accYmax = accYnoise + fabs(accYnoise/2);
+    // accYmin = accYnoise - fabs(accYnoise/2);
+
     QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " +
                   QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
     setCalibration(cal);
@@ -400,4 +453,17 @@ void DataReadingHandler::setfilteredZ(double newFilteredZ)
         return;
     m_filteredZ = newFilteredZ;
     emit filteredZChanged();
+}
+
+QString DataReadingHandler::newpattern() const
+{
+    return m_newpattern;
+}
+
+void DataReadingHandler::setNewpattern(const QString &newNewpattern)
+{
+    // if (m_newpattern == newNewpattern)
+    //     return;
+    m_newpattern = newNewpattern;
+    emit newpatternChanged();
 }
