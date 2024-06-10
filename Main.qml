@@ -163,7 +163,7 @@ ApplicationWindow {
         property real accsampleCount: 0
 
         active: true
-        dataRate: 25
+        dataRate: 50
 
         onReadingChanged: {
             if(active == true){
@@ -189,7 +189,7 @@ ApplicationWindow {
         property real gyrosampleCount: 0
 
         active: true
-        dataRate: 25
+        dataRate: 50
 
         onReadingChanged: {
             if(active == true){

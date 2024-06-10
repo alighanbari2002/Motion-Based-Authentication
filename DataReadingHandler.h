@@ -132,9 +132,11 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 1.2;
+    const double accThresh = 0.5;
     const double rotationThresh = 40;
-    const double datarate = 25;
+    const double DATARATE = 50;
+    const double SAMPLE_COUNT = 5;
+    const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
 
     // Thresholds
     const int calibrationLimit = 100;
@@ -199,6 +201,11 @@ private:
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
+
+    // Average of Signals
+    QList<double> accXList;
+    QList<double> accYList;
+    QList<double> gyroList;
 };
 
 #endif // DATAREADINGHANDLER_H

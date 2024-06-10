@@ -1,5 +1,6 @@
 #include "DataReadingHandler.h"
 #include <QDebug>
+#include <numeric>
 
 DataReadingHandler::DataReadingHandler()
 {
@@ -31,9 +32,25 @@ void DataReadingHandler::accReading(double accX, double accY)
     // {
     //     accX = 0;
     // }
+
+
+
     double inputx;
     double inputy;
 
+    if(accXList.count() < SAMPLE_COUNT || accYList.count() < SAMPLE_COUNT)
+    {
+        accXList.append(accX);
+        accYList.append(accY);
+        return;
+    }
+    else
+    {
+        accX = std::accumulate(accXList.begin(), accXList.end(), 0.0) / SAMPLE_COUNT;
+        accY = std::accumulate(accYList.begin(), accYList.end(), 0.0) / SAMPLE_COUNT;
+        accXList.clear();
+        accYList.clear();
+    }
 
     if(accX <= accXmax && accX >= accXmin)
     {
@@ -106,6 +123,17 @@ void DataReadingHandler::accReading(double accX, double accY)
 
 void DataReadingHandler::gyroReading(double gyroV)
 {
+    if(gyroList.count() < SAMPLE_COUNT)
+    {
+        gyroList.append(gyroV);
+        return;
+    }
+    else
+    {
+        gyroV = std::accumulate(gyroList.begin(), gyroList.end(), 0.0) / SAMPLE_COUNT;
+        gyroList.clear();
+    }
+
     double inputz = gyroV - rotationNoise;
     if(inputz <= rotationMax && inputz >= rotationMin)
     {
@@ -273,8 +301,8 @@ void DataReadingHandler::setaccActive(bool newAccActive)
 
 void DataReadingHandler::handleMovementX(double a)
 {
-    double v = m_velocityX + ((a + prevAccX)/2)/datarate;
-    double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
+    double v = m_velocityX + ((a + prevAccX)/2)/SAMPLE_DATARATE;
+    double x = ((a + prevAccX)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityX/SAMPLE_DATARATE + m_movement;
 
     #ifdef SENSOR_DIAG
         _diagsend->accelerations.append(QJsonValue(a));
@@ -284,12 +312,12 @@ void DataReadingHandler::handleMovementX(double a)
 
     prevAccX = a;
     countx += 1;
-    if(fabs(a) < 0.1)
+    if(fabs(a) < 0.05)
         countzeroX += 1;
     else
         countzeroX = 0;
     // if(fabs(v) <= stationaryAccXThresh)
-    if(countzeroX >= 5)
+    if(countzeroX >= 3)
     {
         #ifdef SENSOR_DIAG
             _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
@@ -315,8 +343,8 @@ void DataReadingHandler::handleMovementX(double a)
 
 void DataReadingHandler::handleMovementY(double a)
 {
-    double v = m_velocityY + ((a + prevAccY)/2)/datarate;
-    double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
+    double v = m_velocityY + ((a + prevAccY)/2)/SAMPLE_DATARATE;
+    double x = ((a + prevAccY)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityY/SAMPLE_DATARATE + m_movement;
 
     #ifdef SENSOR_DIAG
         _diagsend->accelerations.append(QJsonValue(a));
@@ -326,12 +354,12 @@ void DataReadingHandler::handleMovementY(double a)
 
         prevAccY = a;
     county += 1;
-    if(fabs(a) < 0.1)
+    if(fabs(a) < 0.05)
         countzeroY += 1;
     else
         countzeroY = 0;
     // if(fabs(v) <= stationaryAccYThresh)
-    if(countzeroY >= 5)
+    if(countzeroY >= 3)
     {
         #ifdef SENSOR_DIAG
             _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
@@ -357,7 +385,7 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-    double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
+    double teta = m_rotationZ + ((gyroV + prevRotation)/2)/SAMPLE_DATARATE;
 
     #ifdef SENSOR_DIAG
         _diagsend->rotations.append(QJsonValue(teta));
@@ -371,7 +399,7 @@ void DataReadingHandler::handleRotation(double gyroV)
     else
         countzeroZ = 0;
     // if(fabs(gyroV) <= rotationThresh)
-    if(countzeroZ >= 5)
+    if(countzeroZ >= 3)
     {
         #ifdef SENSOR_DIAG
             _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Rotation);
