@@ -1,7 +1,19 @@
 #include "DataReadingHandler.h"
 #include <QDebug>
 
-DataReadingHandler::DataReadingHandler() {}
+DataReadingHandler::DataReadingHandler()
+{
+    #ifdef SENSOR_DIAG
+        _diagsend = new DiagnosticSend();
+    #endif
+}
+
+DataReadingHandler::~DataReadingHandler()
+{
+    #ifdef SENSOR_DIAG
+        delete _diagsend;
+    #endif
+}
 
 void DataReadingHandler::accReading(double accX, double accY)
 {
@@ -138,7 +150,7 @@ void DataReadingHandler::gyroReading(double gyroV)
 void DataReadingHandler::startPattern()
 {
     if(state == Idle)
-   {
+    {
         setaccActive(true);
         setgyroActive(true);
         state = Initial;
@@ -263,15 +275,27 @@ void DataReadingHandler::handleMovementX(double a)
 {
     double v = m_velocityX + ((a + prevAccX)/2)/datarate;
     double x = ((a + prevAccX)/4)/(datarate * datarate) + m_velocityX/datarate + m_movement;
+
+    #ifdef SENSOR_DIAG
+        _diagsend->accelerations.append(QJsonValue(a));
+        _diagsend->velocities.append(QJsonValue(v));
+        _diagsend->movements.append(QJsonValue(x));
+    #endif
+
     prevAccX = a;
     countx += 1;
-    if(fabs(a) < 0.5)
+    if(fabs(a) < 0.1)
         countzeroX += 1;
     else
         countzeroX = 0;
     // if(fabs(v) <= stationaryAccXThresh)
     if(countzeroX >= 5)
     {
+        #ifdef SENSOR_DIAG
+            _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
+            _diagsend->clearLists();
+        #endif
+
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , currentrotation);
         QString newmove = "Movement: " + QString::number(x) + " Direction: " + it->second + " angle: "+
@@ -291,31 +315,34 @@ void DataReadingHandler::handleMovementX(double a)
 
 void DataReadingHandler::handleMovementY(double a)
 {
-    QList<double> accYList;
-    accYList.append(a);
-    QList<double> velocityYList;
-    velocityYList.append(m_velocityY);
-    QList<double> movementList;
-    movementList.append(m_movement);
     double v = m_velocityY + ((a + prevAccY)/2)/datarate;
     double x = ((a + prevAccY)/4)/(datarate * datarate) + m_velocityY/datarate + m_movement;
-    prevAccY = a;
+
+    #ifdef SENSOR_DIAG
+        _diagsend->accelerations.append(QJsonValue(a));
+        _diagsend->velocities.append(QJsonValue(v));
+        _diagsend->movements.append(QJsonValue(x));
+    #endif
+
+        prevAccY = a;
     county += 1;
-    if(fabs(a) < 0.05)
+    if(fabs(a) < 0.1)
         countzeroY += 1;
     else
         countzeroY = 0;
     // if(fabs(v) <= stationaryAccYThresh)
     if(countzeroY >= 5)
     {
+        #ifdef SENSOR_DIAG
+            _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
+            _diagsend->clearLists();
+        #endif
+
         auto it = DirectionMap.find(currentDirection);
         authSource.addNewSequence(x, it->second , m_rotationZ);
         QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second + " angle: "+
                           QString::number(currentrotation);
         setNewpattern(newmove);
-
-        velocityYList.append(v);
-        movementList.append(x);
         v = 0;
         x = 0;
         setgyroActive(true);
@@ -331,6 +358,12 @@ void DataReadingHandler::handleMovementY(double a)
 void DataReadingHandler::handleRotation(double gyroV)
 {
     double teta = m_rotationZ + ((gyroV + prevRotation)/2)/datarate;
+
+    #ifdef SENSOR_DIAG
+        _diagsend->rotations.append(QJsonValue(teta));
+        _diagsend->rotationVelocities.append(QJsonValue(gyroV));
+    #endif
+
     prevRotation = gyroV;
     countz += 1;
     if(fabs(gyroV) < 0.5)
@@ -340,6 +373,11 @@ void DataReadingHandler::handleRotation(double gyroV)
     // if(fabs(gyroV) <= rotationThresh)
     if(countzeroZ >= 5)
     {
+        #ifdef SENSOR_DIAG
+            _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Rotation);
+            _diagsend->clearLists();
+        #endif
+
         int actual = settotalrotation(teta);
         // auto it = DirectionMap.find(currentDirection);
         // authSource.addNewSequence(m_movement, it->second  , teta);
@@ -350,7 +388,7 @@ void DataReadingHandler::handleRotation(double gyroV)
         state = Initial;
         prevRotation = 0;
         countz = 0;
-        countzeroZ = -0;
+        countzeroZ = 0;
         // accThresh = 1;
     }
     setRotationZ(teta);}

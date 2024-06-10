@@ -4,6 +4,7 @@
 #include <QObject>
 #include <math.h>
 #include "Pattern.h"
+#include "DiagnosticSend.h"
 
 class DataReadingHandler : public QObject
 {
@@ -44,6 +45,7 @@ class DataReadingHandler : public QObject
 
 public:
     DataReadingHandler();
+    ~DataReadingHandler();
     Q_INVOKABLE void accReading(double accX, double accY);
     Q_INVOKABLE void gyroReading(double gyroV);
     Q_INVOKABLE void startPattern();
@@ -121,6 +123,8 @@ signals:
     void newpatternChanged();
 
 private:
+    DiagnosticSend* _diagsend;
+
     int settotalrotation(double teta);
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
@@ -148,6 +152,8 @@ private:
     double m_filteredX;
     double m_filteredY;
     double m_filteredZ;
+    QString m_newpattern;
+    QString m_calibration;
 
     // Calibration variables
     double accXSum = 0;
@@ -180,21 +186,19 @@ private:
     void updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min);
     void stopCalibration();
 
-    QString m_calibration;
 
     // Tests
     int county = 0;
     int countx = 0;
     int countz = 0;
 
-    //total
+    // Total
     int currentrotation = 0;
 
-    // Check done
+    // Check End of Sequence
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
-    QString m_newpattern;
 };
 
 #endif // DATAREADINGHANDLER_H
