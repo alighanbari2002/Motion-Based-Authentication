@@ -88,9 +88,18 @@ ApplicationWindow {
         }
         CustomButton {
             text: "Start Authentication"
+            onClicked: {outfield.text = "State: Authentication Started";
+                dataHandler.startAuthentication();
+                console.log("Start Authentication")
+                authenticationout.text = "Waiting for pattern";
+            }
         }
         CustomButton {
             text: "Stop Authentication"
+            onClicked: {outfield.text = "State: Authentication Stopped";
+                dataHandler.stopAuthentication();
+                console.log("Stop Authentication")
+            }
         }
 
         Text {
@@ -270,9 +279,11 @@ ApplicationWindow {
             accbar.yValue = 0.5 + (dataHandler.filteredY / 100)
         }
         onFilteredZChanged: {
-
             gyrobar.zText = "Z: " + dataHandler.filteredZ.toFixed(2)
             accbar.zValue = 0.5 + (dataHandler.filteredZ / 100)
+        }
+        onAuthresultChanged: {
+            authenticationout.text = "Authentication Result: " + dataHandler.authresult
         }
     }
 }

@@ -97,14 +97,14 @@ void DataReadingHandler::accReading(double accX, double accY)
             {
                 state = MoveX;
                 // setgyroActive(false);
-                currentDirection = (inputx > 0) ? Right : Left;
+                currentDirection = calculateDirection(inputx);
                 DataReadingHandler::handleMovementX(inputx);
             }
             else
             {
                 state = MoveY;
                 // setgyroActive(false);
-                currentDirection = (inputy > 0) ? Up : Down;
+                currentDirection = calculateDirection(inputy);
                 DataReadingHandler::handleMovementY(inputy);
             }
         }
@@ -121,6 +121,68 @@ void DataReadingHandler::accReading(double accX, double accY)
     {
         return;
     }
+}
+
+DataReadingHandler::MoveDirection DataReadingHandler::calculateDirection(double input)
+{
+    if (state == MoveX) {
+        if (input > 0) {
+            switch (currentrotation) {
+            case 0:
+                return Right;
+            case 90:
+                return Up;
+            case 180:
+                return Left;
+            case -90:
+                return Down;
+            default:
+                return Right;
+            }
+        } else {
+            switch (currentrotation) {
+            case 0:
+                return Left;
+            case 90:
+                return Down;
+            case 180:
+                return Right;
+            case -90:
+                return Up;
+            default:
+                return Left;
+            }
+        }
+    } else {
+        if (input > 0) {
+            switch (currentrotation) {
+            case 0:
+                return Up;
+            case 90:
+                return Left;
+            case 180:
+                return Down;
+            case -90:
+                return Right;
+            default:
+                return Up;
+            }
+        } else {
+            switch (currentrotation) {
+            case 0:
+                return Down;
+            case 90:
+                return Right;
+            case 180:
+                return Up;
+            case -90:
+                return Left;
+            default:
+                return Down;
+            }
+        }
+    }
+
 }
 
 void DataReadingHandler::gyroReading(double gyroV)
@@ -193,6 +255,7 @@ void DataReadingHandler::startPattern()
         setaccActive(true);
         setgyroActive(true);
         state = Initial;
+        authpattern = false;
         authSource.startNewPattern();
     }
 }
@@ -207,7 +270,35 @@ void DataReadingHandler::stopPattern()
     setvelocityX(0);
     setvelocityY(0);
     setRotationZ(0);
+    currentrotation = 0;
 }
+
+void DataReadingHandler::startAuthentication()
+{
+    if(state ==  Idle)
+    {
+        setaccActive(true);
+        setgyroActive(true);
+        state = Initial;
+        authpattern = true;
+        toBeAuthed.startNewPattern();
+    }
+}
+
+void DataReadingHandler::stopAuthentication()
+{
+    setaccActive(false);
+    setgyroActive(false);
+    state = Idle;
+    setAuthresult(Pattern::isPatternMatch(authSource, toBeAuthed));
+    setMovement(0);
+    setvelocityX(0);
+    setvelocityY(0);
+    setRotationZ(0);
+    currentrotation = 0;
+
+}
+
 
 void DataReadingHandler::startCalibration()
 {
@@ -322,7 +413,7 @@ void DataReadingHandler::handleMovementX(double a)
         _diagsend->movements.append(QJsonValue(x));
     #endif
 
-    prevAccX = a;
+
     // countx += 1;
     if(fabs(a) < 0.05)
     {
@@ -334,7 +425,7 @@ void DataReadingHandler::handleMovementX(double a)
         countzeroX = 0;
         endmovement = 0;
     }
-
+    prevAccX = a;
     if(countzeroX >= 3)
     {
         #ifdef SENSOR_DIAG
@@ -343,7 +434,10 @@ void DataReadingHandler::handleMovementX(double a)
         #endif
         x -= endmovement;
         auto it = DirectionMap.find(currentDirection);
-        authSource.addNewSequence(x, it->second , currentrotation);
+        if(authpattern)
+            toBeAuthed.addNewSequence(x, it->second , currentrotation);
+        else
+            authSource.addNewSequence(x, it->second , currentrotation);
         QString newmove = "Movement: " + QString::number(x) + " Direction: " + it->second + " angle: "+
                           QString::number(currentrotation);
         setNewpattern(newmove);
@@ -354,6 +448,7 @@ void DataReadingHandler::handleMovementX(double a)
         prevAccX = 0;
         // countx = 0;
         countzeroX = 0;
+        endmovement = 0.0;
     }
     setvelocityX(v);
     setMovement(x);
@@ -370,7 +465,7 @@ void DataReadingHandler::handleMovementY(double a)
         _diagsend->movements.append(QJsonValue(x));
     #endif
 
-    prevAccY = a;
+
     // county += 1;
     if(fabs(a) < 0.05)
     {
@@ -380,8 +475,9 @@ void DataReadingHandler::handleMovementY(double a)
     else
     {
         countzeroY = 0;
-        endmovement = 0;
+        endmovement = 0.0;
     }
+    prevAccY = a;
     // if(fabs(v) <= stationaryAccYThresh)
     if(countzeroY >= 3)
     {
@@ -392,7 +488,11 @@ void DataReadingHandler::handleMovementY(double a)
 
         x -= endmovement;
         auto it = DirectionMap.find(currentDirection);
-        authSource.addNewSequence(x, it->second , m_rotationZ);
+        if(authpattern)
+            toBeAuthed.addNewSequence(x, it->second , currentrotation);
+        else
+            authSource.addNewSequence(x, it->second , currentrotation);
+
         QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second + " angle: "+
                           QString::number(currentrotation);
         setNewpattern(newmove);
@@ -403,6 +503,7 @@ void DataReadingHandler::handleMovementY(double a)
         prevAccY = 0;
         // county = 0;
         countzeroY = 0;
+        endmovement = 0.0;
     }
     setvelocityY(v);
     setMovement(x);
@@ -587,4 +688,17 @@ void DataReadingHandler::setNewpattern(const QString &newNewpattern)
     //     return;
     m_newpattern = newNewpattern;
     emit newpatternChanged();
+}
+
+bool DataReadingHandler::authresult() const
+{
+    return m_authresult;
+}
+
+void DataReadingHandler::setAuthresult(const bool &newAuthresult)
+{
+    // if (m_authresult == newAuthresult)
+    //     return;
+    m_authresult = newAuthresult;
+    emit authresultChanged();
 }

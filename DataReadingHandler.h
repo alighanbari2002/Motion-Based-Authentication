@@ -11,36 +11,40 @@ class DataReadingHandler : public QObject
     Q_OBJECT
 
     Q_PROPERTY(double movement READ movement WRITE setMovement
-                   NOTIFY movementChanged FINAL)
+                   NOTIFY movementChanged FINAL);
 
     Q_PROPERTY(double velocityX READ velocityX WRITE setvelocityX
-                   NOTIFY velocityXChanged FINAL)
+                   NOTIFY velocityXChanged FINAL);
 
     Q_PROPERTY(double velocityY READ velocityY WRITE setvelocityY
-                   NOTIFY velocityYChanged FINAL)
+                   NOTIFY velocityYChanged FINAL);
 
     Q_PROPERTY(double rotationZ READ rotationZ WRITE setRotationZ
-                   NOTIFY rotationZChanged FINAL)
+                   NOTIFY rotationZChanged FINAL);
 
     Q_PROPERTY(bool gyroActive READ gyroActive WRITE setgyroActive
-                   NOTIFY gyroActiveChanged FINAL)
+                   NOTIFY gyroActiveChanged FINAL);
 
     Q_PROPERTY(bool accActive READ accActive WRITE setaccActive
-                   NOTIFY accActiveChanged FINAL)
+                   NOTIFY accActiveChanged FINAL);
 
     Q_PROPERTY(QString calibration READ calibration WRITE setCalibration
-                   NOTIFY calibrationChanged FINAL)
+                   NOTIFY calibrationChanged FINAL);
 
     Q_PROPERTY(double filteredX READ filteredX WRITE setfilteredX
-                   NOTIFY filteredXChanged FINAL)
+                   NOTIFY filteredXChanged FINAL);
 
     Q_PROPERTY(double filteredY READ filteredY WRITE setfilteredY
-                   NOTIFY filteredYChanged FINAL)
+                   NOTIFY filteredYChanged FINAL);
 
     Q_PROPERTY(double filteredZ READ filteredZ WRITE setfilteredZ
-                   NOTIFY filteredZChanged FINAL)
+                   NOTIFY filteredZChanged FINAL);
 
-    Q_PROPERTY(QString newpattern READ newpattern WRITE setNewpattern NOTIFY newpatternChanged FINAL)
+    Q_PROPERTY(QString newpattern READ newpattern WRITE setNewpattern
+                   NOTIFY newpatternChanged FINAL);
+
+    Q_PROPERTY(bool authresult READ authresult WRITE setAuthresult
+                   NOTIFY authresultChanged FINAL);
 
 
 public:
@@ -51,6 +55,8 @@ public:
     Q_INVOKABLE void startPattern();
     Q_INVOKABLE void stopPattern();
     Q_INVOKABLE void startCalibration();
+    Q_INVOKABLE void startAuthentication();
+    Q_INVOKABLE void stopAuthentication();
 
     enum ReadingState { Idle, Calibration, Initial, MoveX, MoveY, Rotation };
     Q_ENUM(ReadingState)
@@ -99,6 +105,9 @@ public:
     QString newpattern() const;
     void setNewpattern(const QString &newNewpattern);
 
+    bool authresult() const;
+    void setAuthresult(const bool &newAuthresult);
+
 signals:
     void movementChanged();
 
@@ -122,17 +131,18 @@ signals:
 
     void newpatternChanged();
 
+    void authresultChanged();
+
 private:
     DiagnosticSend* _diagsend;
 
-    int settotalrotation(double teta);
     MoveDirection currentDirection = Up;
     double prevAccX = 0;
     double prevAccY = 0;
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.5;
+    const double accThresh = 0.3;
     const double rotationThresh = 60;
     const double DATARATE = 50;
     const double SAMPLE_COUNT = 5;
@@ -180,6 +190,7 @@ private:
     // Pattern
     Pattern authSource;
     Pattern toBeAuthed;
+    bool authpattern = false;
 
     // Functions
     void handleMovementX(double a);
@@ -187,6 +198,8 @@ private:
     void handleRotation(double gyroV);
     void updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min);
     void stopCalibration();
+    MoveDirection calculateDirection(double input);
+    int settotalrotation(double teta);
 
 
     // Tests
@@ -207,6 +220,7 @@ private:
     QList<double> accXList;
     QList<double> accYList;
     QList<double> gyroList;
+    bool m_authresult;
 };
 
 #endif // DATAREADINGHANDLER_H
