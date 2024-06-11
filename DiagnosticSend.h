@@ -31,7 +31,7 @@ private slots:
     void onError(QTcpSocket::SocketError socketError);
 
 private:
-    const QHostAddress HOST{"192.168.100.98"};
+    const QHostAddress HOST{"172.20.10.2"};
     const quint16 PORT = 20080;
 
     QTcpSocket* _socket;

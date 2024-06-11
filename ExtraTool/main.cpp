@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     quint16 port;
     if(argc != 3)
     {
-        addr = QHostAddress("192.168.100.98");
+        addr = QHostAddress("172.20.10.2");
         port = 20080;
     }
     else

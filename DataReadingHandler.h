@@ -201,6 +201,7 @@ private:
     int countzeroX = 0;
     int countzeroY = 0;
     int countzeroZ = 0;
+    double endmovement = 0.0;
 
     // Average of Signals
     QList<double> accXList;

@@ -73,7 +73,7 @@ void tcpsocketrec::drawAccelerationChart(QJsonArray accs,
 void tcpsocketrec::onConnectionAvailable()
 {
     _socket = _server->nextPendingConnection();
-    QObject::connect(_socket, &QTcpSocket::readyRead, this, &onNewMessage);
+    QObject::connect(_socket, &QTcpSocket::readyRead, this, &tcpsocketrec::onNewMessage);
 }
 
 void tcpsocketrec::onNewMessage()

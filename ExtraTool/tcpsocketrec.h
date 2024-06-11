@@ -21,7 +21,7 @@ private:
     QTcpServer* _server;
     QTcpSocket* _socket;
 
-    const double DATARATE = 25;
+    const double DATARATE = 50;
 
     void drawFromQJsonDocument(QJsonDocument recDoc);
     void drawAccelerationChart(QJsonArray accs, QJsonArray vels,

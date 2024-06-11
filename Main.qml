@@ -222,10 +222,10 @@ ApplicationWindow {
         //     xvelocityout.text = "Velocity X: " + dataHandler.velocityX
         // }
 
-        onVelocityYChanged: {
-            console.log("VelocityY: " + dataHandler.velocityY)
-            yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
-        }
+        // onVelocityYChanged: {
+        //     console.log("VelocityY: " + dataHandler.velocityY)
+        //     yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
+        // }
 
         onAccActiveChanged: {
             if (dataHandler.accActive) {
