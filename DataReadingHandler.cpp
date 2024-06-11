@@ -160,10 +160,16 @@ void DataReadingHandler::gyroReading(double gyroV)
     {
         updateCalibrationInfo(gyroV, rotationSum, rotationCount, rotationMax, rotationMin);
     }
-    else if(state == Initial)
+    else if(state == Initial || state == MoveX || state == MoveY)
     {
         if(fabs(gyroV) > rotationThresh)
         {
+            if(state == MoveX || state == MoveY)
+            {
+                setvelocityY(0.0);
+                setMovement(0.0);
+                setvelocityX(0.0);
+            }
             state = Rotation;
             // setaccActive(false);
             // accThresh = 2;

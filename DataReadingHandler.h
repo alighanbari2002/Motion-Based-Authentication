@@ -133,7 +133,7 @@ private:
 
     // Constants
     const double accThresh = 0.5;
-    const double rotationThresh = 40;
+    const double rotationThresh = 60;
     const double DATARATE = 50;
     const double SAMPLE_COUNT = 5;
     const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
