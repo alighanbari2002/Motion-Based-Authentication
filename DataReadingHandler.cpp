@@ -1,4 +1,5 @@
 #include "DataReadingHandler.h"
+#include "defs.h"
 #include <QDebug>
 #include <numeric>
 
@@ -21,7 +22,7 @@ void DataReadingHandler::accReading(double accX, double accY)
     double inputx;
     double inputy;
 
-    if(accXList.count() < SAMPLE_COUNT || accYList.count() < SAMPLE_COUNT)
+    if(accXList.count() < System::SAMPLE_COUNT || accYList.count() < System::SAMPLE_COUNT)
     {
         accXList.append(accX);
         accYList.append(accY);
@@ -29,8 +30,8 @@ void DataReadingHandler::accReading(double accX, double accY)
     }
     else
     {
-        accX = std::accumulate(accXList.begin(), accXList.end(), 0.0) / SAMPLE_COUNT;
-        accY = std::accumulate(accYList.begin(), accYList.end(), 0.0) / SAMPLE_COUNT;
+        accX = std::accumulate(accXList.begin(), accXList.end(), 0.0) / System::SAMPLE_COUNT;
+        accY = std::accumulate(accYList.begin(), accYList.end(), 0.0) / System::SAMPLE_COUNT;
         accXList.clear();
         accYList.clear();
     }
@@ -69,29 +70,9 @@ void DataReadingHandler::accReading(double accX, double accY)
         updateCalibrationInfo(accX, accXSum, accXCount, accXmax, accXmin);
         updateCalibrationInfo(accY, accYSum, accYCount, accYmax, accYmin);
     }
-    // else if(state == Initial)
-    // {
-    //     if((fabs(prevAccX - inputx) > accThresh) || (fabs(prevAccY - inputy) > accThresh))
-    //     {
-    //         if(fabs(prevAccX - inputx) > fabs(prevAccY - inputy))
-    //         {
-    //             state = MoveX;
-    //             // setgyroActive(false);
-    //             currentDirection = (inputx > 0) ? Right : Left;
-    //             DataReadingHandler::handleMovementX(inputx);
-    //         }
-    //         else
-    //         {
-    //             state = MoveY;
-    //             // setgyroActive(false);
-    //             currentDirection = (inputy > 0) ? Up : Down;
-    //             DataReadingHandler::handleMovementY(inputy);
-    //         }
-    //     }
-    // }
     else if(state == Initial)
     {
-        if((fabs(inputx) > accThresh) || (fabs(inputy) > accThresh))
+        if((fabs(inputx) > Thresh::START_ACC) || (fabs(inputy) > Thresh::START_ACC))
         {
             if(fabs(inputx) > fabs(inputy))
             {
@@ -187,14 +168,14 @@ DataReadingHandler::MoveDirection DataReadingHandler::calculateDirection(double 
 
 void DataReadingHandler::gyroReading(double gyroV)
 {
-    if(gyroList.count() < SAMPLE_COUNT)
+    if(gyroList.count() < System::SAMPLE_COUNT)
     {
         gyroList.append(gyroV);
         return;
     }
     else
     {
-        gyroV = std::accumulate(gyroList.begin(), gyroList.end(), 0.0) / SAMPLE_COUNT;
+        gyroV = std::accumulate(gyroList.begin(), gyroList.end(), 0.0) / System::SAMPLE_COUNT;
         gyroList.clear();
     }
 
@@ -224,7 +205,7 @@ void DataReadingHandler::gyroReading(double gyroV)
     }
     else if(state == Initial || state == MoveX || state == MoveY)
     {
-        if(fabs(gyroV) > rotationThresh)
+        if(fabs(gyroV) > Thresh::START_ROTATION)
         {
             if(state == MoveX || state == MoveY)
             {
@@ -233,8 +214,6 @@ void DataReadingHandler::gyroReading(double gyroV)
                 setvelocityX(0.0);
             }
             state = Rotation;
-            // setaccActive(false);
-            // accThresh = 2;
             DataReadingHandler::handleRotation(gyroV);
         }
     }
@@ -322,89 +301,12 @@ void DataReadingHandler::startCalibration()
     rotationMin = 100;
 }
 
-double DataReadingHandler::movement() const
-{
-    return m_movement;
-}
-
-void DataReadingHandler::setMovement(double newMovement)
-{
-    if (m_movement == newMovement)
-        return;
-    m_movement = newMovement;
-    emit movementChanged();
-}
-
-double DataReadingHandler::velocityX() const
-{
-    return m_velocityX;
-}
-
-void DataReadingHandler::setvelocityX(double newVelocityX)
-{
-    if (m_velocityX == newVelocityX)
-        return;
-    m_velocityX = newVelocityX;
-    emit velocityXChanged();
-}
-
-double DataReadingHandler::velocityY() const
-{
-    return m_velocityY;
-}
-
-void DataReadingHandler::setvelocityY(double newVelocityY)
-{
-    if (m_velocityY == newVelocityY)
-        return;
-    m_velocityY = newVelocityY;
-    emit velocityYChanged();
-}
-
-double DataReadingHandler::rotationZ() const
-{
-    return m_rotationZ;
-}
-
-void DataReadingHandler::setRotationZ(double newRotationZ)
-{
-    if (m_rotationZ == newRotationZ)
-        return;
-    m_rotationZ = newRotationZ;
-    emit rotationZChanged();
-}
-
-bool DataReadingHandler::gyroActive() const
-{
-    return m_gyroActive;
-}
-
-void DataReadingHandler::setgyroActive(bool newGyroActive)
-{
-    if (m_gyroActive == newGyroActive)
-        return;
-    m_gyroActive = newGyroActive;
-
-    emit gyroActiveChanged();
-}
-
-bool DataReadingHandler::accActive() const
-{
-    return m_accActive;
-}
-
-void DataReadingHandler::setaccActive(bool newAccActive)
-{
-    if (m_accActive == newAccActive)
-        return;
-    m_accActive = newAccActive;
-    emit accActiveChanged();
-}
 
 void DataReadingHandler::handleMovementX(double a)
 {
-    double v = m_velocityX + ((a + prevAccX)/2)/SAMPLE_DATARATE;
-    double x = ((a + prevAccX)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityX/SAMPLE_DATARATE + m_movement;
+    double v = m_velocityX + ((a + prevAccX)/2) / System::SAMPLE_DATARATE;
+    double x = ((a + prevAccX)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                m_velocityX/SAMPLE_DATARATE + m_movement;
 
 
     #ifdef SENSOR_DIAG
@@ -415,10 +317,11 @@ void DataReadingHandler::handleMovementX(double a)
 
 
     // countx += 1;
-    if(fabs(a) < 0.05)
+    if(fabs(a) < Thresh::STOP_ACC_X)
     {
         countzeroX += 1;
-        endmovement += ((a + prevAccX)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityX/SAMPLE_DATARATE;
+        endmovement += ((a + prevAccX)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                        m_velocityX/System::SAMPLE_DATARATE;
     }
     else
     {
@@ -432,13 +335,17 @@ void DataReadingHandler::handleMovementX(double a)
             _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
             _diagsend->clearLists();
         #endif
+
         x -= endmovement;
         auto it = DirectionMap.find(currentDirection);
+
         if(authpattern)
             toBeAuthed.addNewSequence(x, it->second , currentrotation);
         else
             authSource.addNewSequence(x, it->second , currentrotation);
-        QString newmove = "Movement: " + QString::number(x) + " Direction: " + it->second + " angle: "+
+
+        QString newmove = "Movement: " + QString::number(x) + " Direction: " + it->second +
+                          " angle: " +
                           QString::number(currentrotation);
         setNewpattern(newmove);
         v = 0;
@@ -456,8 +363,9 @@ void DataReadingHandler::handleMovementX(double a)
 
 void DataReadingHandler::handleMovementY(double a)
 {
-    double v = m_velocityY + ((a + prevAccY)/2)/SAMPLE_DATARATE;
-    double x = ((a + prevAccY)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityY/SAMPLE_DATARATE + m_movement;
+    double v = m_velocityY + ((a + prevAccY)/2) / System::SAMPLE_DATARATE;
+    double x = ((a + prevAccY)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                m_velocityY/System::SAMPLE_DATARATE + m_movement;
 
     #ifdef SENSOR_DIAG
         _diagsend->accelerations.append(QJsonValue(a));
@@ -465,12 +373,11 @@ void DataReadingHandler::handleMovementY(double a)
         _diagsend->movements.append(QJsonValue(x));
     #endif
 
-
-    // county += 1;
-    if(fabs(a) < 0.05)
+    if(fabs(a) < Thresh::STOP_ACC_Y)
     {
         countzeroY += 1;
-        endmovement += ((a + prevAccY)/4)/(SAMPLE_DATARATE * SAMPLE_DATARATE) + m_velocityY/SAMPLE_DATARATE;
+        endmovement += ((a + prevAccY)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                        m_velocityY/System::SAMPLE_DATARATE;
     }
     else
     {
@@ -511,7 +418,7 @@ void DataReadingHandler::handleMovementY(double a)
 
 void DataReadingHandler::handleRotation(double gyroV)
 {
-    double teta = m_rotationZ + ((gyroV + prevRotation)/2)/SAMPLE_DATARATE;
+    double teta = m_rotationZ + ((gyroV + prevRotation)/2) / System::SAMPLE_DATARATE;
 
     #ifdef SENSOR_DIAG
         _diagsend->rotations.append(QJsonValue(teta));
@@ -520,11 +427,10 @@ void DataReadingHandler::handleRotation(double gyroV)
 
     prevRotation = gyroV;
     // countz += 1;
-    if(fabs(gyroV) < 0.05)
+    if(fabs(gyroV) < Thresh::STOP_ROTATION)
         countzeroZ += 1;
     else
         countzeroZ = 0;
-    // if(fabs(gyroV) <= rotationThresh)
     if(countzeroZ >= 3)
     {
         #ifdef SENSOR_DIAG
@@ -533,9 +439,8 @@ void DataReadingHandler::handleRotation(double gyroV)
         #endif
 
         int actual = settotalrotation(teta);
-        // auto it = DirectionMap.find(currentDirection);
-        // authSource.addNewSequence(m_movement, it->second  , teta);
-        QString newmove = "Rotation: " + QString::number(teta) + "actual: " + QString::number(actual) ;
+
+        QString newmove = "Rotation: " + QString::number(teta) + "actual: " + QString::number(actual);
         setNewpattern(newmove);
         teta = 0;
         // setaccActive(true);
@@ -600,24 +505,12 @@ void DataReadingHandler::stopCalibration()
     accXnoise = accXSum / accXCount;
     accYnoise = accYSum / accYCount;
 
-    // accXmax = accXmax - accXnoise;
-    // accXmin = accXmin - accXnoise;
-    // accYmax = accYmax - accYnoise;
-    // accYmin = accYmin - accYnoise;
-    // rotationMax = rotationMax - rotationNoise;
-    // rotationMin = rotationMin - rotationNoise;
-
     accXmax = accXmax * rangecoef;
     accXmin = accXmin * rangecoef;
     accYmax = accYmax * rangecoef;
     accYmin = accYmin * rangecoef;
     rotationMax = rotationMax * rangecoef;
     rotationMin = rotationMin * rangecoef;
-
-    // accXmax = accXnoise + fabs(accXnoise/2);
-    // accXmin = accXnoise - fabs(accXnoise/2);
-    // accYmax = accYnoise + fabs(accYnoise/2);
-    // accYmin = accYnoise - fabs(accYnoise/2);
 
     QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " +
                   QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
@@ -698,8 +591,6 @@ QString DataReadingHandler::newpattern() const
 
 void DataReadingHandler::setNewpattern(const QString &newNewpattern)
 {
-    // if (m_newpattern == newNewpattern)
-    //     return;
     m_newpattern = newNewpattern;
     emit newpatternChanged();
 }
@@ -711,8 +602,6 @@ bool DataReadingHandler::authresult() const
 
 void DataReadingHandler::setAuthresult(const bool &newAuthresult)
 {
-    // if (m_authresult == newAuthresult)
-    //     return;
     m_authresult = newAuthresult;
     emit authresultChanged();
 }
@@ -728,4 +617,83 @@ void DataReadingHandler::setMidMoveCal(bool newMidMoveCal)
         return;
     m_midMoveCal = newMidMoveCal;
     emit midMoveCalChanged();
+}
+
+double DataReadingHandler::movement() const
+{
+    return m_movement;
+}
+
+void DataReadingHandler::setMovement(double newMovement)
+{
+    if (m_movement == newMovement)
+        return;
+    m_movement = newMovement;
+    emit movementChanged();
+}
+
+double DataReadingHandler::velocityX() const
+{
+    return m_velocityX;
+}
+
+void DataReadingHandler::setvelocityX(double newVelocityX)
+{
+    if (m_velocityX == newVelocityX)
+        return;
+    m_velocityX = newVelocityX;
+    emit velocityXChanged();
+}
+
+double DataReadingHandler::velocityY() const
+{
+    return m_velocityY;
+}
+
+void DataReadingHandler::setvelocityY(double newVelocityY)
+{
+    if (m_velocityY == newVelocityY)
+        return;
+    m_velocityY = newVelocityY;
+    emit velocityYChanged();
+}
+
+double DataReadingHandler::rotationZ() const
+{
+    return m_rotationZ;
+}
+
+void DataReadingHandler::setRotationZ(double newRotationZ)
+{
+    if (m_rotationZ == newRotationZ)
+        return;
+    m_rotationZ = newRotationZ;
+    emit rotationZChanged();
+}
+
+bool DataReadingHandler::gyroActive() const
+{
+    return m_gyroActive;
+}
+
+void DataReadingHandler::setgyroActive(bool newGyroActive)
+{
+    if (m_gyroActive == newGyroActive)
+        return;
+    m_gyroActive = newGyroActive;
+
+    emit gyroActiveChanged();
+}
+
+bool DataReadingHandler::accActive() const
+{
+    return m_accActive;
+}
+
+void DataReadingHandler::setaccActive(bool newAccActive)
+{
+    if (m_accActive == newAccActive)
+        return;
+    m_accActive = newAccActive;
+    emit accActiveChanged();
 }

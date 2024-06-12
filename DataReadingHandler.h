@@ -11,43 +11,43 @@ class DataReadingHandler : public QObject
     Q_OBJECT
 
     Q_PROPERTY(double movement READ movement WRITE setMovement
-                   NOTIFY movementChanged FINAL);
+                   NOTIFY movementChanged FINAL)
 
     Q_PROPERTY(double velocityX READ velocityX WRITE setvelocityX
-                   NOTIFY velocityXChanged FINAL);
+                   NOTIFY velocityXChanged FINAL)
 
     Q_PROPERTY(double velocityY READ velocityY WRITE setvelocityY
-                   NOTIFY velocityYChanged FINAL);
+                   NOTIFY velocityYChanged FINAL)
 
     Q_PROPERTY(double rotationZ READ rotationZ WRITE setRotationZ
-                   NOTIFY rotationZChanged FINAL);
+                   NOTIFY rotationZChanged FINAL)
 
     Q_PROPERTY(bool gyroActive READ gyroActive WRITE setgyroActive
-                   NOTIFY gyroActiveChanged FINAL);
+                   NOTIFY gyroActiveChanged FINAL)
 
     Q_PROPERTY(bool accActive READ accActive WRITE setaccActive
-                   NOTIFY accActiveChanged FINAL);
+                   NOTIFY accActiveChanged FINAL)
 
     Q_PROPERTY(QString calibration READ calibration WRITE setCalibration
-                   NOTIFY calibrationChanged FINAL);
+                   NOTIFY calibrationChanged FINAL)
 
     Q_PROPERTY(double filteredX READ filteredX WRITE setfilteredX
-                   NOTIFY filteredXChanged FINAL);
+                   NOTIFY filteredXChanged FINAL)
 
     Q_PROPERTY(double filteredY READ filteredY WRITE setfilteredY
-                   NOTIFY filteredYChanged FINAL);
+                   NOTIFY filteredYChanged FINAL)
 
     Q_PROPERTY(double filteredZ READ filteredZ WRITE setfilteredZ
-                   NOTIFY filteredZChanged FINAL);
+                   NOTIFY filteredZChanged FINAL)
 
     Q_PROPERTY(QString newpattern READ newpattern WRITE setNewpattern
-                   NOTIFY newpatternChanged FINAL);
+                   NOTIFY newpatternChanged FINAL)
 
     Q_PROPERTY(bool authresult READ authresult WRITE setAuthresult
-                   NOTIFY authresultChanged FINAL);
+                   NOTIFY authresultChanged FINAL)
 
     Q_PROPERTY(bool midMoveCal READ midMoveCal WRITE setMidMoveCal
-                   NOTIFY midMoveCalChanged FINAL);
+                   NOTIFY midMoveCalChanged FINAL)
 
 
 
@@ -150,26 +150,18 @@ private:
     double prevAccY = 0;
     double prevRotation = 0;
 
-    // Constants
-    const double accThresh = 0.2;
-    const double rotationThresh = 60;
-    const double DATARATE = 50;
-    const double SAMPLE_COUNT = 5;
-    const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
-
     // Thresholds
     const int calibrationLimit = 10;
-    // const double stationaryAccXThresh = 0.15;
-    // const double stationaryAccYThresh = 0.0;
-    // const double stationaryRotationThresh = 0.1;
 
     // Q_PROPERTY values
+    bool m_gyroActive = true;
+    bool m_accActive = true;
+    bool m_authresult;
+    bool m_midMoveCal;
     double m_movement = 0;
     double m_velocityX = 0;
     double m_velocityY = 0;
     double m_rotationZ = 0;
-    bool m_gyroActive = true;
-    bool m_accActive = true;
     double m_filteredX;
     double m_filteredY;
     double m_filteredZ;
@@ -231,8 +223,6 @@ private:
     QList<double> accXList;
     QList<double> accYList;
     QList<double> gyroList;
-    bool m_authresult;
-    bool m_midMoveCal;
 };
 
 #endif // DATAREADINGHANDLER_H

@@ -27,6 +27,7 @@ qt_add_qml_module(appQtSensorAuth
         RESOURCES
         QML_FILES ProgressZBar.qml
         SOURCES DiagnosticSend.h DiagnosticSend.cpp
+        SOURCES defs.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
