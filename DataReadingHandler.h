@@ -10,18 +10,6 @@ class DataReadingHandler : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(double movement READ movement WRITE setMovement
-                   NOTIFY movementChanged FINAL)
-
-    Q_PROPERTY(double velocityX READ velocityX WRITE setvelocityX
-                   NOTIFY velocityXChanged FINAL)
-
-    Q_PROPERTY(double velocityY READ velocityY WRITE setvelocityY
-                   NOTIFY velocityYChanged FINAL)
-
-    Q_PROPERTY(double rotationZ READ rotationZ WRITE setRotationZ
-                   NOTIFY rotationZChanged FINAL)
-
     Q_PROPERTY(bool gyroActive READ gyroActive WRITE setgyroActive
                    NOTIFY gyroActiveChanged FINAL)
 
@@ -150,23 +138,20 @@ private:
     double prevAccY = 0;
     double prevRotation = 0;
 
-    // Thresholds
-    const int calibrationLimit = 10;
-
     // Q_PROPERTY values
-    bool m_gyroActive = true;
-    bool m_accActive = true;
-    bool m_authresult;
-    bool m_midMoveCal;
     double m_movement = 0;
     double m_velocityX = 0;
     double m_velocityY = 0;
     double m_rotationZ = 0;
+    bool m_gyroActive = true;
+    bool m_accActive = true;
     double m_filteredX;
     double m_filteredY;
     double m_filteredZ;
     QString m_newpattern;
     QString m_calibration;
+    bool m_authresult;
+    bool m_midMoveCal;
 
     // Calibration variables
     double accXSum = 0;
