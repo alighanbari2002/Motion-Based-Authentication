@@ -10,18 +10,6 @@ class DataReadingHandler : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(double movement READ movement WRITE setMovement
-                   NOTIFY movementChanged FINAL);
-
-    Q_PROPERTY(double velocityX READ velocityX WRITE setvelocityX
-                   NOTIFY velocityXChanged FINAL);
-
-    Q_PROPERTY(double velocityY READ velocityY WRITE setvelocityY
-                   NOTIFY velocityYChanged FINAL);
-
-    Q_PROPERTY(double rotationZ READ rotationZ WRITE setRotationZ
-                   NOTIFY rotationZChanged FINAL);
-
     Q_PROPERTY(bool gyroActive READ gyroActive WRITE setgyroActive
                    NOTIFY gyroActiveChanged FINAL);
 

@@ -58,7 +58,7 @@ ApplicationWindow {
 
         CustomButton {
             text: "Start Calibration"
-            onClicked: {outfield.text = "State: Calibration Started";
+            onClicked: {state.text = "State: Calibration Started";
                 dataHandler.startCalibration()
                 console.log("Calibration started")
                 xText: "X: " + accelerometer.x.toFixed(2)
@@ -72,31 +72,32 @@ ApplicationWindow {
 
         CustomButton {
             text: "Start Pattern"
-            onClicked: {outfield.text = "State: Pattern Started";
+            onClicked: {state.text = "State: Pattern Started";
                 accelerometer.accsampleCount = 0
                 gyroscope.gyrosampleCount = 0
                 dataHandler.startPattern();
                 console.log("Start pattern")
+                newmove.text = "Waiting for move";
             }
         }
         CustomButton {
             text: "Stop Pattern"
-            onClicked: {outfield.text = "State: Pattern Stopped";
+            onClicked: {state.text = "State: Pattern Stopped";
                 dataHandler.stopPattern();
                 console.log("Stop pattern")
             }
         }
         CustomButton {
             text: "Start Authentication"
-            onClicked: {outfield.text = "State: Authentication Started";
+            onClicked: {state.text = "State: Authentication Started";
                 dataHandler.startAuthentication();
                 console.log("Start Authentication")
-                authenticationout.text = "Waiting for pattern";
+                newmove.text = "Waiting for move";
             }
         }
         CustomButton {
             text: "Stop Authentication"
-            onClicked: {outfield.text = "State: Authentication Stopped";
+            onClicked: {state.text = "State: Authentication Stopped";
                 dataHandler.stopAuthentication();
                 console.log("Stop Authentication")
             }
@@ -135,33 +136,28 @@ ApplicationWindow {
         }
 
         Text {
-            id: outfield
+            id: state
             text: qsTr("State: Idle")
         }
 
         Text {
-            id: movementout
-            text: qsTr("Movement: 0")
-        }
-        
-        Text {
-            id: yvelocityout
-            text: qsTr("Velocity Y: 0")
-        }
-        
-        Text {
-            id: xvelocityout
-            text: qsTr("Velocity X: 0")
+            id: event
+            text: qsTr("Event: ")
         }
 
         Text {
-            id: rotationout
-            text: qsTr("Rotation: 0")
+            id: calibration
+            text: qsTr("Calibration: ")
         }
-
+        
+        Text {
+            id: newmove
+            text: qsTr("Last Move: ")
+        }
+        
         Text {
             id: authenticationout
-            text: qsTr("Authentication: 0")
+            text: qsTr("Authentication Result: ")
         }
     }
     Accelerometer {
@@ -180,9 +176,7 @@ ApplicationWindow {
                 x = (reading as AccelerometerReading).x
                 y = (reading as AccelerometerReading).y
                 z = (reading as AccelerometerReading).z
-                // xvelocityout.text = "Velocity X: " + x
-                // yvelocityout.text = "Velocity Y: " + y
-                console.log("X: " + x + " Y: " + y + " " + outfield.text  + " Count:" + accsampleCount
+                console.log("X: " + x + " Y: " + y + " " + state.text  + " Count:" + accsampleCount
                             + " AccActive:" + active + " GyroActive:" + gyroscope.active)
                 dataHandler.accReading(x,y)
             }
@@ -206,8 +200,7 @@ ApplicationWindow {
                 x = (reading as GyroscopeReading).x
                 y = (reading as GyroscopeReading).y
                 z = (reading as GyroscopeReading).z
-                // rotationout.text = "Rotation: " + z
-                console.log("Z: " + z + " " + outfield.text + " Count:" + gyrosampleCount
+                console.log("Z: " + z + " " + state.text + " Count:" + gyrosampleCount
                             + " AccActive:" + accelerometer.active + " GyroActive:" + active)
                 dataHandler.gyroReading(z)
             }
@@ -216,58 +209,29 @@ ApplicationWindow {
 
     DataReadingHandler{
         id: dataHandler
-        // onMovementChanged: {
-        //     console.log("Movement: " + dataHandler.movement)
-        //     movementout.text = "Movement: " + dataHandler.movement
-        // }
-
-        // onRotationZChanged: {
-        //     console.log("Rotation: " + dataHandler.rotationZ)
-        //     rotationout.text = "Rotation: " + dataHandler.rotationZ
-        // }
-
-        // onVelocityXChanged: {
-        //     console.log("VelocityX: " + dataHandler.velocityX)
-        //     xvelocityout.text = "Velocity X: " + dataHandler.velocityX
-        // }
-
-        // onVelocityYChanged: {
-        //     console.log("VelocityY: " + dataHandler.velocityY)
-        //     yvelocityout.text = "Velocity Y: " + dataHandler.velocityY
-        // }
 
         onAccActiveChanged: {
             if (dataHandler.accActive) {
                 accelerometer.start();
-                console.log("Acc activity:",accelerometer.active)
-                console.log("Acc Active")
             } else {
                 accelerometer.stop();
-                console.log("Acc activity:",accelerometer.active)
-                console.log("Acc Inactive")
             }
         }
         onGyroActiveChanged: {
             if (dataHandler.gyroActive) {
                 gyroscope.start();
-                console.log("Gyro activity:",gyroscope.active)
-                console.log("Gyro Active")
             } else {
                 gyroscope.stop();
-                console.log("Gyro activity:",gyroscope.active)
-                console.log("Gyro Inactive")
             }
         }
         onCalibrationChanged: {
-            console.log("Calibration: " + dataHandler.calibration)
-            outfield.text = "Calibration done"
-            authenticationout.text = "Calibration: " + dataHandler.calibration
+            event.text = "Event: Calibration Done"
+            calibration.text = "Calibration: " + dataHandler.calibration
             ProgressXYZBar.caldone = true
         }
         onNewpatternChanged: {
-            console.log("move: " + dataHandler.newpattern)
-            outfield.text = "New move recorded"
-            authenticationout.text = "New move: " + dataHandler.newpattern
+            event.text = "Event: New move recorded"
+            newmove.text = "Last Move: " + dataHandler.newpattern
         }
 
         onFilteredXChanged: {
@@ -289,11 +253,11 @@ ApplicationWindow {
         onMidMoveCalChanged: {
             if(dataHandler.midMoveCal)
             {
-                authenticationout.text = "Please wait for new Calibration";
+                event.text = "Event: Please wait for new Calibration";
             }
             else
             {
-                authenticationout.text = "Ready for next move";
+                event.text = "Event: Ready for next move";
             }
         }
     }
