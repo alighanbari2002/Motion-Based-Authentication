@@ -6,7 +6,7 @@
 #include <QTcpSocket>
 #include <QJsonArray>
 
-#define SENSOR_DIAG
+// #define SENSOR_DIAG
 
 class DiagnosticSend : public QObject
 {

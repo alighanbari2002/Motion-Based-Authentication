@@ -22,7 +22,7 @@ qt_add_qml_module(appQtSensorAuth
         QML_FILES ProgressXYBar.qml
         SOURCES
         SOURCES Pattern.h Pattern.cpp
-        SOURCES logger.h logger.cpp
+        SOURCES
         RESOURCES
         RESOURCES
         QML_FILES ProgressZBar.qml

@@ -181,8 +181,8 @@ private:
     bool authpattern = false;
 
     // Functions
-    void handleMovementX(double a);
-    void handleMovementY(double a);
+    void handleMovement(double a, double &velocity, double &prevAcc, double &movement,
+                        const double STOP_ACC, int &countZero, bool isX);
     void handleRotation(double gyroV);
     void updateCalibrationInfo(double newData, double &sum, double &count, double &max, double &min);
     void stopCalibration();

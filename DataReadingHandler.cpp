@@ -79,24 +79,28 @@ void DataReadingHandler::accReading(double accX, double accY)
                 state = MoveX;
                 // setgyroActive(false);
                 currentDirection = calculateDirection(inputx);
-                DataReadingHandler::handleMovementX(inputx);
+                handleMovement(inputx, m_velocityX, prevAccX, m_movement,
+                               Thresh::STOP_ACC_X, countzeroX, true);
             }
             else
             {
                 state = MoveY;
                 // setgyroActive(false);
                 currentDirection = calculateDirection(inputy);
-                DataReadingHandler::handleMovementY(inputy);
+                handleMovement(inputy, m_velocityY, prevAccY, m_movement, Thresh::STOP_ACC_Y,
+                               countzeroY, false);
             }
         }
     }
     else if(state == MoveX)
     {
-        handleMovementX(inputx);
+        handleMovement(inputx, m_velocityX, prevAccX, m_movement,
+                       Thresh::STOP_ACC_X, countzeroX, true);
     }
     else if(state == MoveY)
     {
-        handleMovementY(inputy);
+        handleMovement(inputy, m_velocityY, prevAccY, m_movement, Thresh::STOP_ACC_Y,
+                       countzeroY, false);
     }
     else
     {
@@ -301,13 +305,12 @@ void DataReadingHandler::startCalibration()
     rotationMin = 100;
 }
 
-
-void DataReadingHandler::handleMovementX(double a)
+void DataReadingHandler::handleMovement(double a, double &velocity, double &prevAcc, double &movement,
+                                        const double STOP_ACC, int &countZero, bool isX)
 {
-    double v = m_velocityX + ((a + prevAccX)/2) / System::SAMPLE_DATARATE;
-    double x = ((a + prevAccX)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
-                m_velocityX/SAMPLE_DATARATE + m_movement;
-
+    double v = velocity + ((a + prevAcc)/2) / System::SAMPLE_DATARATE;
+    double x = ((a + prevAcc)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                velocity/System::SAMPLE_DATARATE + movement;
 
     #ifdef SENSOR_DIAG
         _diagsend->accelerations.append(QJsonValue(a));
@@ -315,25 +318,24 @@ void DataReadingHandler::handleMovementX(double a)
         _diagsend->movements.append(QJsonValue(x));
     #endif
 
-
-    // countx += 1;
-    if(fabs(a) < Thresh::STOP_ACC_X)
+    if(fabs(a) < STOP_ACC)
     {
-        countzeroX += 1;
-        endmovement += ((a + prevAccX)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
-                        m_velocityX/System::SAMPLE_DATARATE;
+        countZero += 1;
+        endmovement += ((a + prevAcc)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
+                        velocity/System::SAMPLE_DATARATE;
     }
     else
     {
-        countzeroX = 0;
+        countZero = 0;
         endmovement = 0;
     }
-    prevAccX = a;
-    if(countzeroX >= 3)
+
+    prevAcc = a;
+    if(countZero >= 3)
     {
         #ifdef SENSOR_DIAG
-            _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
-            _diagsend->clearLists();
+                _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
+                _diagsend->clearLists();
         #endif
 
         x -= endmovement;
@@ -350,69 +352,19 @@ void DataReadingHandler::handleMovementX(double a)
         setNewpattern(newmove);
         v = 0;
         x = 0;
-        // setgyroActive(true);
         state = Initial;
-        prevAccX = 0;
-        // countx = 0;
-        countzeroX = 0;
+        prevAcc = 0;
+        countZero = 0;
         endmovement = 0.0;
     }
-    setvelocityX(v);
-    setMovement(x);
-}
-
-void DataReadingHandler::handleMovementY(double a)
-{
-    double v = m_velocityY + ((a + prevAccY)/2) / System::SAMPLE_DATARATE;
-    double x = ((a + prevAccY)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
-                m_velocityY/System::SAMPLE_DATARATE + m_movement;
-
-    #ifdef SENSOR_DIAG
-        _diagsend->accelerations.append(QJsonValue(a));
-        _diagsend->velocities.append(QJsonValue(v));
-        _diagsend->movements.append(QJsonValue(x));
-    #endif
-
-    if(fabs(a) < Thresh::STOP_ACC_Y)
+    if(isX)
     {
-        countzeroY += 1;
-        endmovement += ((a + prevAccY)/4) / (System::SAMPLE_DATARATE * System::SAMPLE_DATARATE) +
-                        m_velocityY/System::SAMPLE_DATARATE;
+        setvelocityX(v);
     }
     else
     {
-        countzeroY = 0;
-        endmovement = 0.0;
+        setvelocityY(v);
     }
-    prevAccY = a;
-    // if(fabs(v) <= stationaryAccYThresh)
-    if(countzeroY >= 3)
-    {
-        #ifdef SENSOR_DIAG
-            _diagsend->sendDiagInfo(DiagnosticSend::DiagInfoMode::Acceleration);
-            _diagsend->clearLists();
-        #endif
-
-        x -= endmovement;
-        auto it = DirectionMap.find(currentDirection);
-        if(authpattern)
-            toBeAuthed.addNewSequence(x, it->second , currentrotation);
-        else
-            authSource.addNewSequence(x, it->second , currentrotation);
-
-        QString newmove = "Movement: " + QString::number(x) + "Direction: " + it->second + " angle: "+
-                          QString::number(currentrotation);
-        setNewpattern(newmove);
-        v = 0;
-        x = 0;
-        // setgyroActive(true);
-        state = Initial;
-        prevAccY = 0;
-        // county = 0;
-        countzeroY = 0;
-        endmovement = 0.0;
-    }
-    setvelocityY(v);
     setMovement(x);
 }
 
@@ -493,7 +445,7 @@ void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, doub
     {
         min = newData;
     }
-    if(count > calibrationLimit)
+    if(count > Thresh::CALIBRATION_LIMIT)
     {
         DataReadingHandler::stopCalibration();
     }

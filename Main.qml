@@ -4,8 +4,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtSensors
 import com.DataReadingHandler.h 1.0
-import com.logger.h
-
 
 ApplicationWindow {
     id: root;
