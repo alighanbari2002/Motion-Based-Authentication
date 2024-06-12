@@ -285,5 +285,16 @@ ApplicationWindow {
         onAuthresultChanged: {
             authenticationout.text = "Authentication Result: " + dataHandler.authresult
         }
+
+        onMidMoveCalChanged: {
+            if(dataHandler.midMoveCal)
+            {
+                authenticationout.text = "Please wait for new Calibration";
+            }
+            else
+            {
+                authenticationout.text = "Ready for next move";
+            }
+        }
     }
 }

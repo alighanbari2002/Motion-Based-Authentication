@@ -46,6 +46,10 @@ class DataReadingHandler : public QObject
     Q_PROPERTY(bool authresult READ authresult WRITE setAuthresult
                    NOTIFY authresultChanged FINAL);
 
+    Q_PROPERTY(bool midMoveCal READ midMoveCal WRITE setMidMoveCal
+                   NOTIFY midMoveCalChanged FINAL);
+
+
 
 public:
     DataReadingHandler();
@@ -108,6 +112,9 @@ public:
     bool authresult() const;
     void setAuthresult(const bool &newAuthresult);
 
+    bool midMoveCal() const;
+    void setMidMoveCal(bool newMidMoveCal);
+
 signals:
     void movementChanged();
 
@@ -133,6 +140,8 @@ signals:
 
     void authresultChanged();
 
+    void midMoveCalChanged();
+
 private:
     DiagnosticSend* _diagsend;
 
@@ -149,7 +158,7 @@ private:
     const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
 
     // Thresholds
-    const int calibrationLimit = 50;
+    const int calibrationLimit = 10;
     // const double stationaryAccXThresh = 0.15;
     // const double stationaryAccYThresh = 0.0;
     // const double stationaryRotationThresh = 0.1;
@@ -177,6 +186,8 @@ private:
     double rotationNoise = 0;
     double accXnoise = 0;
     double accYnoise = 0;
+    bool midMoveCalibration = false;
+    int calDoneCount = 0;
 
     // Calibration ranges
     double accXmax = 0;
@@ -221,6 +232,7 @@ private:
     QList<double> accYList;
     QList<double> gyroList;
     bool m_authresult;
+    bool m_midMoveCal;
 };
 
 #endif // DATAREADINGHANDLER_H

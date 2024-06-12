@@ -537,14 +537,15 @@ void DataReadingHandler::handleRotation(double gyroV)
         // authSource.addNewSequence(m_movement, it->second  , teta);
         QString newmove = "Rotation: " + QString::number(teta) + "actual: " + QString::number(actual) ;
         setNewpattern(newmove);
-        //can calibrate
         teta = 0;
         // setaccActive(true);
         state = Initial;
         prevRotation = 0;
         // countz = 0;
         countzeroZ = 0;
-        // accThresh = 1;
+
+        setMidMoveCal(true);
+        DataReadingHandler::startCalibration();
     }
     setRotationZ(teta);
 }
@@ -587,9 +588,9 @@ void DataReadingHandler::updateCalibrationInfo(double newData, double &sum, doub
     {
         min = newData;
     }
-    if(count > 100)
+    if(count > calibrationLimit)
     {
-        stopCalibration();
+        DataReadingHandler::stopCalibration();
     }
 }
 
@@ -621,7 +622,19 @@ void DataReadingHandler::stopCalibration()
     QString cal = "Rotation noise: " + QString::number(rotationNoise) + "\nAccX noise: " +
                   QString::number(accXnoise) + "\nAccY noise: " + QString::number(accYnoise);
     setCalibration(cal);
-    state = Idle;
+    calDoneCount += 1;
+    if(calDoneCount % 3 == 0)
+    {
+        if(midMoveCal())
+        {
+            state = Initial;
+            setMidMoveCal(false);
+        }
+        else
+        {
+            state = Idle;
+        }
+    }
 }
 
 
@@ -702,4 +715,17 @@ void DataReadingHandler::setAuthresult(const bool &newAuthresult)
     //     return;
     m_authresult = newAuthresult;
     emit authresultChanged();
+}
+
+bool DataReadingHandler::midMoveCal() const
+{
+    return m_midMoveCal;
+}
+
+void DataReadingHandler::setMidMoveCal(bool newMidMoveCal)
+{
+    if (m_midMoveCal == newMidMoveCal)
+        return;
+    m_midMoveCal = newMidMoveCal;
+    emit midMoveCalChanged();
 }
