@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-const double moveTolerance = 0.25;
+const double moveTolerance = 0.8;
 const double angleTolerance = 0.25;
 
 

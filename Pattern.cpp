@@ -28,18 +28,26 @@ bool Pattern::isPatternMatch(Pattern source, Pattern tobeAuthed)
     }
     for(int i = 0; i < source.pattern.size(); i++)
     {
-        double moveLowerBound = source.pattern.at(i).toObject().value("movement").toDouble() * (1-moveTolerance);
-        double moveHigherBound = source.pattern.at(i).toObject().value("movement").toDouble() * (1+moveTolerance);
-        double angleLowerBound = source.pattern.at(i).toObject().value("angle").toDouble() * (1-angleTolerance);
-        double angleHigherBound = source.pattern.at(i).toObject().value("angle").toDouble() * (1+angleTolerance);
-
-        if(moveLowerBound > tobeAuthed.pattern.at(i).toObject().value("movement").toDouble() ||
-            moveHigherBound < tobeAuthed.pattern.at(i).toObject().value("movement").toDouble())
+        double sourcemovement = source.pattern.at(i).toObject().value("movement").toDouble();
+        double tobeAuthedmovement = tobeAuthed.pattern.at(i).toObject().value("movement").toDouble();
+        double moveLowerBound = fabs(sourcemovement) * (1-moveTolerance);
+        double moveHigherBound = fabs(sourcemovement) * (1+moveTolerance);
+        double angle = source.pattern.at(i).toObject().value("angle").toDouble();
+        QString direction = source.pattern.at(i).toObject().value("direction").toString();
+        if(sourcemovement * tobeAuthedmovement < 0)
         {
             return false;
         }
-        if(angleLowerBound > tobeAuthed.pattern.at(i).toObject().value("angle").toDouble() ||
-            angleHigherBound < tobeAuthed.pattern.at(i).toObject().value("angle").toDouble())
+        if(moveLowerBound > fabs(tobeAuthedmovement) ||
+            moveHigherBound < fabs(tobeAuthedmovement))
+        {
+            return false;
+        }
+        if(angle != tobeAuthed.pattern.at(i).toObject().value("angle").toDouble())
+        {
+            return false;
+        }
+        if(direction !=  tobeAuthed.pattern.at(i).toObject().value("direction").toString())
         {
             return false;
         }

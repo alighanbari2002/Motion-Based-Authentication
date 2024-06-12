@@ -142,17 +142,17 @@ private:
     double prevRotation = 0;
 
     // Constants
-    const double accThresh = 0.3;
+    const double accThresh = 0.2;
     const double rotationThresh = 60;
     const double DATARATE = 50;
     const double SAMPLE_COUNT = 5;
     const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
 
     // Thresholds
-    const int calibrationLimit = 100;
-    const double stationaryAccXThresh = 0.15;
-    const double stationaryAccYThresh = 0.0;
-    const double stationaryRotationThresh = 0.1;
+    const int calibrationLimit = 50;
+    // const double stationaryAccXThresh = 0.15;
+    // const double stationaryAccYThresh = 0.0;
+    // const double stationaryRotationThresh = 0.1;
 
     // Q_PROPERTY values
     double m_movement = 0;

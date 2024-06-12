@@ -537,6 +537,7 @@ void DataReadingHandler::handleRotation(double gyroV)
         // authSource.addNewSequence(m_movement, it->second  , teta);
         QString newmove = "Rotation: " + QString::number(teta) + "actual: " + QString::number(actual) ;
         setNewpattern(newmove);
+        //can calibrate
         teta = 0;
         // setaccActive(true);
         state = Initial;
