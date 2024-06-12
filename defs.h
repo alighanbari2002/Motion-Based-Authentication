@@ -7,7 +7,7 @@ namespace Thresh {
     const double STOP_ACC_Y = 0.05;
     const double STOP_ACC_X = 0.05;
     const double STOP_ROTATION = 0.05;
-    const int CALIBRATION_LIMIT = 10;
+    const int CALIBRATION_LIMIT = 5;
 }
 
 namespace System {
@@ -15,10 +15,6 @@ namespace System {
     const double SAMPLE_COUNT = 5;
     const double SAMPLE_DATARATE = DATARATE / SAMPLE_COUNT;
 }
-
-struct Calibration {
-
-};
 
 
 #endif // DEFS_H
